@@ -1,5 +1,4 @@
 #include "ClassRegisterer.h"
-#include <iostream>
 
 ClassRegisterer* ClassRegisterer::GetInstance()
 {
@@ -7,44 +6,38 @@ ClassRegisterer* ClassRegisterer::GetInstance()
     return &instance;
 }
 
-ATOM ClassRegisterer::registerClass(WCHAR classname[], size_t len, WNDCLASSEXW wcex)
+ATOM ClassRegisterer::registerClass(const std::wstring classname, WNDCLASSEXW wcex)
 {
-    std::wstring className(classname, len);
-
-    if (classCache.find(className) != classCache.end())
-    {
-        return 0;
-    }
+    if (classCache.find(classname) != classCache.end()) return 0;
 
     auto atom = RegisterClassExW(&wcex);
+    if (atom == 0) return 0;
 
-
-    if (atom == 0)
-    {
-        return 0;
-    }
-
-    classCache[className] = wcex;
+    classCache[classname] = wcex;
     return atom;
 }
 
-bool ClassRegisterer::classExists(const WCHAR classname[], size_t len)
+bool ClassRegisterer::classExists(const std::wstring classname)
 {
-    std::wstring className(classname, len);
-    return (classCache.find(className) != classCache.end());
+    return (classCache.find(classname) != classCache.end());
 }
 
-WNDCLASSEXW ClassRegisterer::getWindowClass(const WCHAR classname[], size_t len)
+WNDCLASSEXW ClassRegisterer::getWindowClass(const std::wstring classname)
 {
-    std::wstring className(classname, len);
-
     // Check if the class exists in the cache
-    auto it = classCache.find(className);
-    if (it != classCache.end())
-    {
-        return it->second; // Return the cached class
-    }
+    auto it = classCache.find(classname);
+    if (it != classCache.end()) return it->second; // Return the cached class
 
     // If not found, return an empty WNDCLASSEXW object (to indicate not found)
     return WNDCLASSEXW{};
+}
+
+bool ClassRegisterer::unregisterClasses()
+{
+	for (auto& pair : classCache)
+	{
+		if (!UnregisterClassW(pair.first.c_str(), pair.second.hInstance)) return false;
+	}
+	classCache.clear();
+	return true;
 }

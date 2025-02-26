@@ -23,8 +23,9 @@ public:
 	ClassRegisterer& operator=(const ClassRegisterer&) = delete;
 
 	static ClassRegisterer* GetInstance();
-	ATOM registerClass(WCHAR classname[], size_t len, WNDCLASSEXW clazz);
-	bool classExists(const WCHAR classname[], size_t len);
-	WNDCLASSEXW getWindowClass(const WCHAR classname[], size_t len);
+	ATOM registerClass(const std::wstring classname, WNDCLASSEXW clazz);
+	bool classExists(const std::wstring classname);
+	WNDCLASSEXW getWindowClass(const std::wstring classname);
+	bool unregisterClasses();
 };
 

@@ -6,7 +6,6 @@
 #include "Window.h"
 #include "resource.h"
 #include "ClassRegisterer.h"
-#include <iostream>
 
 /**
  * @brief Constructor for the Window class. Initializes the window class name, title, and command show flag.
@@ -16,16 +15,14 @@
  * @param title Title of the window.
  * @param nCmdShow Flag that controls how the window is to be shown.
  */
-Window::Window(HINSTANCE hInstance,
-    WCHAR className[MAX_LOADSTRING],
-    WCHAR title[MAX_LOADSTRING],
-    int nCmdShow)
-    : hInstance(hInstance), nCmdShow(nCmdShow), hWnd(nullptr) {
-    wcscpy_s(szTitle, MAX_LOADSTRING, title);
-    wcscpy_s(szWindowClass, MAX_LOADSTRING, className);
+Window::Window(HINSTANCE hInstance, const std::wstring& className, const std::wstring& title, int nCmdShow, DWORD style)
+    : hInstance(hInstance), szWindowClass(className), szTitle(title), nCmdShow(nCmdShow), dwStyle(style), hWnd(nullptr) {
 }
 
 Window::~Window() {
+    if (hWnd) {
+        DestroyWindow(hWnd);
+    }
 }
 
 /**
@@ -35,17 +32,14 @@ Window::~Window() {
  */
 bool Window::Init() {
     ClassRegisterer* registerer = ClassRegisterer::GetInstance();
-	if (!registerer->classExists(szWindowClass, MAX_LOADSTRING)) {
-        auto windowClass = CreateWindowClasss(hInstance, szWindowClass);                           // Create the window class
-        if (!registerer->registerClass(szWindowClass, MAX_LOADSTRING, windowClass)) return false;  // Register the window class
+	if (!registerer->classExists(szWindowClass)) {
+        auto windowClass = CreateWindowClass(hInstance, szWindowClass);                        // Create the window class
+        if (!registerer->registerClass(szWindowClass, windowClass)) return false;              // Register the window class
     }
 
-    hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-        CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);             // Create the window
-
-    if (!hWnd) {
-        return false;
-    }
+    hWnd = CreateWindowW(szWindowClass.c_str(), szTitle.c_str(), WS_OVERLAPPEDWINDOW,
+        CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, this);                // Create the window
+    if (!hWnd) return false;
 
     SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));                   // Store the Window object in the window's user data
 
@@ -55,24 +49,24 @@ bool Window::Init() {
     return true;
 }
 
-void Window::RunMessageLoop() {
+void Window::RunMessageLoop() const {
     HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_CAREDGER));
     MSG msg;
 
     while (GetMessage(&msg, nullptr, 0, 0)) {
-        if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg)) {
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
-        }
+        if (TranslateAccelerator(msg.hwnd, hAccelTable, &msg)) continue;
+
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
     }
 }
 
-WNDCLASSEXW Window::CreateWindowClasss(HINSTANCE hInstance, WCHAR className[MAX_LOADSTRING])
+WNDCLASSEXW Window::CreateWindowClass(HINSTANCE hInstance, std::wstring className)
 {
-    WNDCLASSEXW wcex;
+    WNDCLASSEXW wcex { 0 };
 
     wcex.cbSize = sizeof(WNDCLASSEX);
-    wcex.style = CS_HREDRAW | CS_VREDRAW;
+    wcex.style = dwStyle;
     wcex.lpfnWndProc = WndProc;
     wcex.cbClsExtra = 0;
     wcex.cbWndExtra = 0;
@@ -80,54 +74,24 @@ WNDCLASSEXW Window::CreateWindowClasss(HINSTANCE hInstance, WCHAR className[MAX_
     wcex.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_CAREDGER));
     wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
     wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-    wcex.lpszMenuName = MAKEINTRESOURCEW(IDC_CAREDGER);
-    wcex.lpszClassName = className;
-    wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
+    wcex.lpszMenuName = MAKEINTRESOURCEW(IDC_CAREDGER);                        // Load the menu
+    wcex.lpszClassName = szWindowClass.c_str();                                // Set the class name
+    wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));       // Load a small icon
 
     return wcex;
 }
 
-INT_PTR CALLBACK About1(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) {
-    switch (message) {
-    case WM_INITDIALOG:
-        return (INT_PTR)TRUE;
-    case WM_COMMAND:
-        if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL) {
-            EndDialog(hDlg, LOWORD(wParam));
-            return (INT_PTR)TRUE;
-        }
-        break;
-    }
-    return (INT_PTR)FALSE;
-}
-
-
 LRESULT CALLBACK Window::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
-    Window* pWindow = reinterpret_cast<Window*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
-    switch (message) {
-    case WM_COMMAND: {
-        int wmId = LOWORD(wParam);
-        switch (wmId) {
-        case IDM_ABOUT:
-            DialogBoxW(pWindow->hInstance, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About1);
-            break;
-        case IDM_EXIT:
-            DestroyWindow(hWnd);
-            break;
-        default:
-            return DefWindowProc(hWnd, message, wParam, lParam);
-        }
-    } break;
-    case WM_PAINT: {
-        PAINTSTRUCT ps;
-        HDC hdc = BeginPaint(hWnd, &ps);
-        EndPaint(hWnd, &ps);
-    } break;
-    case WM_DESTROY:
-        PostQuitMessage(0);
-        break;
-    default:
-        return DefWindowProc(hWnd, message, wParam, lParam);
+    Window* pWindow = nullptr;
+
+    if (message == WM_NCCREATE) {
+        CREATESTRUCT* pCreate = reinterpret_cast<CREATESTRUCT*>(lParam);
+        pWindow = static_cast<Window*>(pCreate->lpCreateParams);
+        SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pWindow));
+    } else {
+        pWindow = reinterpret_cast<Window*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
     }
-    return 0;
+
+    if (pWindow)  return pWindow->HandleMessage(message, wParam, lParam);
+    return DefWindowProc(hWnd, message, wParam, lParam);
 }

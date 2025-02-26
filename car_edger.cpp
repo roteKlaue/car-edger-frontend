@@ -6,6 +6,56 @@
 #include "framework.h"
 #include "car_edger.h"
 #include "Window.h"
+#include <iostream>
+
+class MyWindow : public Window {
+public:
+    MyWindow(HINSTANCE hInstance, int nCmdShow)
+        : Window(hInstance, L"WindowClass", L"Car Edger", nCmdShow) {
+    }
+protected:
+    LRESULT HandleMessage(UINT message, WPARAM wParam, LPARAM lParam) {
+        switch (message) {
+        case WM_PAINT: {
+            PAINTSTRUCT ps;
+            HDC hdc = BeginPaint(GetHandle(), &ps);
+            FillRect(hdc, &ps.rcPaint, (HBRUSH)(COLOR_WINDOW + 1));
+            EndPaint(GetHandle(), &ps);
+            return 0;
+        }
+        default:
+            return DefWindowProc(GetHandle(), message, wParam, lParam);
+        }
+    }
+};
+
+void AttachConsoleToStdout() {
+    AllocConsole(); // Allocate a new console window
+
+    // Redirect standard output to the console
+    FILE* f;
+    freopen_s(&f, "CONOUT$", "w", stdout);
+}
+
+void PrintLastError() {
+    DWORD error = GetLastError();
+    LPWSTR messageBuffer = nullptr;
+
+    FormatMessageW(
+        FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+        nullptr,
+        error,
+        0,
+        (LPWSTR)&messageBuffer,
+        0,
+        nullptr);
+
+    std::wcout << L"Error " << error << L": " << (messageBuffer ? messageBuffer : L"Unknown error") << std::endl;
+
+    if (messageBuffer) {
+        LocalFree(messageBuffer);
+    }
+}
 
 // application entry point
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance, // handle to the current instance
@@ -15,16 +65,14 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, // handle to the current instanc
 {
 	UNREFERENCED_PARAMETER(hPrevInstance);      // unused parameter
 	UNREFERENCED_PARAMETER(lpCmdLine); 		    // unused parameter
-
-    // Initialize global strings
-    WCHAR className[MAX_LOADSTRING] = L"WindowClass";
-    WCHAR title[MAX_LOADSTRING] = L"Car Edger";
+    AttachConsoleToStdout();
 
     // Create a Window object
-    Window window(hInstance, className, title, nCmdShow);
+    MyWindow window(hInstance, nCmdShow);
 
     // Initialize the window
     if (!window.Init()) {
+		PrintLastError();
         MessageBoxW(nullptr, L"Window initialization failed!", L"Error", MB_OK | MB_ICONERROR);
         return 0;
     }
