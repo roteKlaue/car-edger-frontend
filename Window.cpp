@@ -6,6 +6,7 @@
 #include "Window.h"
 #include "resource.h"
 #include "ClassRegisterer.h"
+#include <iostream>
 
 /**
  * @brief Constructor for the Window class. Initializes the window class name, title, and command show flag.
@@ -35,12 +36,9 @@ Window::~Window() {
 bool Window::Init() {
     ClassRegisterer* registerer = ClassRegisterer::GetInstance();
 	if (!registerer->classExists(szWindowClass, MAX_LOADSTRING)) {
-        // auto windowClass = CreateWindowClasss(hInstance, szWindowClass);                           // Create the window class
-        // registerer->registerClass(szWindowClass, MAX_LOADSTRING, windowClass); // Register the window class
+        auto windowClass = CreateWindowClasss(hInstance, szWindowClass);                           // Create the window class
+        if (!registerer->registerClass(szWindowClass, MAX_LOADSTRING, windowClass)) return false;  // Register the window class
     }
-
-    auto windowClass = CreateWindowClasss(hInstance, szWindowClass);
-    RegisterClassExW(&windowClass);
 
     hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);             // Create the window

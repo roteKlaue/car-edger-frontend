@@ -1,8 +1,10 @@
 #include "ClassRegisterer.h"
+#include <iostream>
 
 ClassRegisterer* ClassRegisterer::GetInstance()
 {
-	return nullptr;
+    static ClassRegisterer instance;
+    return &instance;
 }
 
 ATOM ClassRegisterer::registerClass(WCHAR classname[], size_t len, WNDCLASSEXW wcex)
