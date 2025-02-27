@@ -1,43 +1,22 @@
 // car_edger.cpp : Defines the entry point for the application.
-// Author: Jan Köck
+// Author: Jan Kï¿½ck
 // Created: 2025/02/26
 //
 
 #include "framework.h"
 #include "car_edger.h"
-#include "Window.h"
+#include "Windows.h"
 #include <iostream>
+#include "ClassRegisterer.h"
 
-class MyWindow : public Window {
-public:
-    MyWindow(HINSTANCE hInstance, int nCmdShow)
-        : Window(hInstance, L"WindowClass", L"Car Edger", nCmdShow) {
-    }
-protected:
-    LRESULT HandleMessage(UINT message, WPARAM wParam, LPARAM lParam) {
-        switch (message) {
-        case WM_PAINT: {
-            PAINTSTRUCT ps;
-            HDC hdc = BeginPaint(GetHandle(), &ps);
-            FillRect(hdc, &ps.rcPaint, (HBRUSH)(COLOR_WINDOW + 1));
-            EndPaint(GetHandle(), &ps);
-            return 0;
-        }
-        default:
-            return DefWindowProc(GetHandle(), message, wParam, lParam);
-        }
-    }
-};
-
-void AttachConsoleToStdout() {
+static void AttachConsoleToStdout() {
     AllocConsole(); // Allocate a new console window
-
     // Redirect standard output to the console
     FILE* f;
     freopen_s(&f, "CONOUT$", "w", stdout);
 }
 
-void PrintLastError() {
+static void PrintLastError() {
     DWORD error = GetLastError();
     LPWSTR messageBuffer = nullptr;
 
@@ -52,9 +31,7 @@ void PrintLastError() {
 
     std::wcout << L"Error " << error << L": " << (messageBuffer ? messageBuffer : L"Unknown error") << std::endl;
 
-    if (messageBuffer) {
-        LocalFree(messageBuffer);
-    }
+    if (messageBuffer) LocalFree(messageBuffer);
 }
 
 // application entry point
@@ -68,7 +45,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, // handle to the current instanc
     AttachConsoleToStdout();
 
     // Create a Window object
-    MyWindow window(hInstance, nCmdShow);
+    MainWindow window(hInstance, nCmdShow);
 
     // Initialize the window
     if (!window.Init()) {
@@ -79,6 +56,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, // handle to the current instanc
 
     // Run the message loop
     window.RunMessageLoop();
+
+    ClassRegisterer::GetInstance()->unregisterClasses();
 
     return 0;
 }

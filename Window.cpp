@@ -16,13 +16,11 @@
  * @param nCmdShow Flag that controls how the window is to be shown.
  */
 Window::Window(HINSTANCE hInstance, const std::wstring& className, const std::wstring& title, int nCmdShow, DWORD style)
-    : hInstance(hInstance), szWindowClass(className), szTitle(title), nCmdShow(nCmdShow), dwStyle(style), hWnd(nullptr) {
-}
+    : hInstance(hInstance), szWindowClass(className), szTitle(title), nCmdShow(nCmdShow), dwStyle(style), hWnd(nullptr) {}
 
 Window::~Window() {
-    if (hWnd) {
-        DestroyWindow(hWnd);
-    }
+    if (!hWnd) return;
+    DestroyWindow(hWnd);
 }
 
 /**
@@ -37,7 +35,7 @@ bool Window::Init() {
         if (!registerer->registerClass(szWindowClass, windowClass)) return false;              // Register the window class
     }
 
-    hWnd = CreateWindowW(szWindowClass.c_str(), szTitle.c_str(), WS_OVERLAPPEDWINDOW,
+    hWnd = CreateWindowW(szWindowClass.c_str(), szTitle.c_str(), dwStyle,
         CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, this);                // Create the window
     if (!hWnd) return false;
 
@@ -66,7 +64,7 @@ WNDCLASSEXW Window::CreateWindowClass(HINSTANCE hInstance, std::wstring classNam
     WNDCLASSEXW wcex { 0 };
 
     wcex.cbSize = sizeof(WNDCLASSEX);
-    wcex.style = dwStyle;
+    wcex.style = CS_HREDRAW | CS_VREDRAW;
     wcex.lpfnWndProc = WndProc;
     wcex.cbClsExtra = 0;
     wcex.cbWndExtra = 0;
@@ -74,9 +72,9 @@ WNDCLASSEXW Window::CreateWindowClass(HINSTANCE hInstance, std::wstring classNam
     wcex.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_CAREDGER));
     wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
     wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-    wcex.lpszMenuName = MAKEINTRESOURCEW(IDC_CAREDGER);                        // Load the menu
-    wcex.lpszClassName = szWindowClass.c_str();                                // Set the class name
-    wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));       // Load a small icon
+    wcex.lpszClassName = szWindowClass.c_str();                                 // Set the class name
+    wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));        // Load a small icon
+    if (menuResource != -1) wcex.lpszMenuName = MAKEINTRESOURCEW(menuResource); // Load the menu
 
     return wcex;
 }
@@ -92,6 +90,11 @@ LRESULT CALLBACK Window::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
         pWindow = reinterpret_cast<Window*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
     }
 
-    if (pWindow)  return pWindow->HandleMessage(message, wParam, lParam);
+    if (message == WM_DESTROY) {
+        PostQuitMessage(0);
+        return 0;
+    }
+
+    if (pWindow) return pWindow->HandleMessage(hWnd, message, wParam, lParam);
     return DefWindowProc(hWnd, message, wParam, lParam);
 }

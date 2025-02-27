@@ -133,11 +133,13 @@
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Window.h" />
+    <ClInclude Include="Windows.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="car_edger.cpp" />
     <ClCompile Include="ClassRegisterer.cpp" />
     <ClCompile Include="Window.cpp" />
+    <ClCompile Include="Windows.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="car_edger.rc" />
