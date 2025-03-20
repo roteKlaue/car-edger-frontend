@@ -1,13 +1,13 @@
 // car_edger.cpp : Defines the entry point for the application.
-// Author: Jan K�ck
+// Author: Jan Koeck
 // Created: 2025/02/26
 //
 
+#include "ClassRegisterer.h"
 #include "framework.h"
 #include "car_edger.h"
 #include "Windows.h"
 #include <iostream>
-#include "ClassRegisterer.h"
 
 static void AttachConsoleToStdout() {
     AllocConsole(); // Allocate a new console window
@@ -45,7 +45,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, // handle to the current instanc
     AttachConsoleToStdout();
 
     // Create a Window object
-    MainWindow window(hInstance, nCmdShow);
+    TestWindow window(hInstance, nCmdShow);
 
     // Initialize the window
     if (!window.Init()) {
@@ -53,6 +53,16 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, // handle to the current instanc
         MessageBoxW(nullptr, L"Window initialization failed!", L"Error", MB_OK | MB_ICONERROR);
         return 0;
     }
+
+    HWND hndl = window.GetWindowHandle();
+    HMENU hMenu = CreateMenu();
+
+    HMENU hSubMenu = CreatePopupMenu();
+    AppendMenuW(hSubMenu, MF_STRING, 1, L"Open");
+    AppendMenuW(hSubMenu, MF_STRING, 2, L"Exit");
+    AppendMenuW(hMenu, MF_POPUP, (UINT_PTR)hSubMenu, L"File");
+    // SetMenu(hndl, hMenu);
+    DrawMenuBar(hndl);
 
     // Run the message loop
     window.RunMessageLoop();

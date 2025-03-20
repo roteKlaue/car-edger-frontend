@@ -1,11 +1,12 @@
-// car_edger.cpp : Window Class implementation.
-// Author: Jan Köck
+// Window.cpp : Window Class implementation.
+// Author: Jan Koeck
 // Created: 2025/02/26
 //
 
 #include "Window.h"
 #include "resource.h"
 #include "ClassRegisterer.h"
+#include <iostream>
 
 /**
  * @brief Constructor for the Window class. Initializes the window class name, title, and command show flag.
@@ -16,7 +17,7 @@
  * @param nCmdShow Flag that controls how the window is to be shown.
  */
 Window::Window(HINSTANCE hInstance, const std::wstring& className, const std::wstring& title, int nCmdShow, DWORD style)
-    : hInstance(hInstance), szWindowClass(className), szTitle(title), nCmdShow(nCmdShow), dwStyle(style), hWnd(nullptr) {}
+    : hInstance(hInstance), szWindowClass(className), szTitle(title), nCmdShow(nCmdShow), dwStyle(style), hWnd(nullptr), menu(nullptr) {}
 
 Window::~Window() {
     if (!hWnd) return;
@@ -59,6 +60,15 @@ void Window::RunMessageLoop() const {
     }
 }
 
+void Window::RegisterComponents() {
+    if (menu) {
+        SetMenu(hWnd, menu->GetHandle());
+        menu->Register(this, nullptr);
+        std::cout << "test" << std::endl;
+        DrawMenuBar(hWnd);
+    }
+}
+
 WNDCLASSEXW Window::CreateWindowClass(HINSTANCE hInstance, std::wstring className)
 {
     WNDCLASSEXW wcex { 0 };
@@ -88,6 +98,10 @@ LRESULT CALLBACK Window::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
         SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pWindow));
     } else {
         pWindow = reinterpret_cast<Window*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
+    }
+
+    if (message == WM_CREATE) {
+        pWindow->RegisterComponents();
     }
 
     if (message == WM_DESTROY) {
