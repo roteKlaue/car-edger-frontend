@@ -24,6 +24,8 @@ enum class MenuType {
 class Menu {
 public:
     explicit Menu(MenuType type = MenuType::MainMenu);
+    Menu(const Menu&) = delete;
+    Menu& operator=(const Menu&) = delete;
     Menu& AddSubMenu(Menu* submenu);
     Menu& AddOption(Option* option);
     Menu& AddDivider();

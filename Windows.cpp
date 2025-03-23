@@ -28,3 +28,12 @@ LRESULT TestWindow::HandleMessage(HWND eventHandle, UINT message, WPARAM wParam,
         return DefWindowProc(eventHandle, message, wParam, lParam);
     }
 }
+
+LRESULT TestWindow2::HandleMessage(HWND eventHandle, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    if (message == WM_CREATE) {
+        
+    }
+
+    return DefWindowProc(eventHandle, message, wParam, lParam);
+}

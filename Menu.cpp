@@ -1,39 +1,22 @@
 #include "Menu.h"
 #include "Window.h"
+#include <iostream>
+#include "Util.h"
 
-static UINT s_nextMenuId = 1;
-
-static UINT GenerateId() {
-    return s_nextMenuId++;
-}
-
-Menu::Menu(MenuType type) : type(type), id(GenerateId()) {
-    switch (type) {
-    case MenuType::MainMenu:
-        hMenu = CreateMenu();
-        break;
-    case MenuType::PopupMenu:
-    case MenuType::SystemMenu:
-        hMenu = CreatePopupMenu();
-        break;
-    }
+Menu::Menu(MenuType type) : type(type), id(Util::GenerateId()) {
+    std::cout << "Creating menu of type: " << (int)type << std::endl;
 }
 
 Menu& Menu::AddSubMenu(Menu *submenu) {
-    if (!hMenu || !submenu->hMenu) {
-        return *this;
-    }
-
-    AppendMenuW(hMenu, MF_POPUP, (UINT_PTR)submenu->hMenu, submenu->label.c_str());
+    std::cout << "Adding submenu: " << submenu->id << std::endl;
     subMenus.push_back(submenu);
-
     return *this;
 }
 
 Menu& Menu::AddOption(Option* option)
 {
     if (!hMenu) return *this;
-    AppendMenuW(hMenu, MF_STRING, option->id, option->label.c_str());
+    // AppendMenuW(hMenu, MF_STRING, option->id, option->label.c_str());
     options[option->id] = option;
     return *this;
 }
@@ -45,27 +28,71 @@ Menu& Menu::AddDivider() {
 
 void Menu::Register(Window* window, Menu *parent)
 {
-    if (!window || !hMenu) {
+    switch (type) {
+    case MenuType::MainMenu:
+        hMenu = CreateMenu();
+        if (!hMenu) {
+            std::cerr << "Failed to create MainMenu!" << std::endl;
+        }
+    case MenuType::PopupMenu:
+    case MenuType::SystemMenu:
+        hMenu = CreatePopupMenu();
+        if (!hMenu) {
+            std::cerr << "Failed to create PopupMenu or SystemMenu!" << std::endl;
+        }
+        break;
+    }
+
+    std::cout << "Menu object address: " << this << std::endl;
+    std::cout << "Menu type: " << (int) type << std::endl;
+    std::cout << "Menu hMenu handle: " << hMenu << std::endl;
+
+    std::cout << "Register - hMenu: " << hMenu << std::endl;
+
+    if (window == nullptr || hMenu == nullptr) {
+        std::cout << "Missing window or hMenu" << std::endl; 
         return;
     }
-    return;
 
     HWND hwnd = window->GetWindowHandle();
 
-    if (type == MenuType::MainMenu) {
-        SetMenu(hwnd, hMenu);
-        DrawMenuBar(hwnd);
-    }
-
-    for (auto& pair : options)
+    /*for (auto& pair : options)
     {
-        pair.second->Init(window, this);
-    }
+        std::cout << "Address of pair: " << &pair << std::endl;
+        if (pair.second != nullptr) {
+            std::cout << "Address of pair.second: " << pair.second << std::endl;
+            pair.second->Init(window, this);
+        } else {
+            std::cout << "Warning: pair.second is null!" << std::endl;
+        }
+    }*/
 
     for (Menu *men : subMenus) {
         if (men == nullptr) continue;
         men->Register(window, this);
     }
+
+    if (type == MenuType::MainMenu) {
+        SetMenu(hwnd, hMenu);
+        DrawMenuBar(hwnd);
+        return;
+    }
+
+    // testing here
+
+    if (!parent) {
+        std::cout << "Missing parent for NON MainMenu type menu" << std::endl;
+        return;
+    }
+    std::cout << "Missing parent for NON MainMenu type menu" << std::endl;
+
+    AppendMenu(hMenu, MF_STRING, 1, L"&New");
+    AppendMenu(hMenu, MF_STRING, 2, L"&Open");
+    AppendMenu(hMenu, MF_STRING, 3, L"&Save");
+    AppendMenu(hMenu, MF_SEPARATOR, 0, NULL);
+    AppendMenu(hMenu, MF_STRING, 4, L"E&xit");
+
+    AppendMenu(parent->GetHandle(), MF_POPUP, (UINT_PTR)hMenu, label.c_str());
 }
 
 void Menu::PropagateClick(UINT id)
@@ -87,7 +114,7 @@ Menu& Menu::SetLabel(const std::wstring& menuLabel) {
     return *this;
 }
 
-Option::Option(std::wstring label) : label(label), id(GenerateId()) {}
+Option::Option(std::wstring label) : label(label), id(Util::GenerateId()) {}
 
 void Option::Init(Window* wWindow, Menu* parent)
 {

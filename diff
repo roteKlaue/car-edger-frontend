@@ -1,0 +1,530 @@
+diff --git a/.gitignore b/.gitignore
+index c76f1a3..dd0f92e 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -523,3 +523,4 @@ FodyWeavers.xsd
+ # Additional files built by Visual Studio
+ 
+ # End of https://www.toptal.com/developers/gitignore/api/clion+all,c++,visualstudio
++.qodo
+diff --git a/InputField.cpp b/InputField.cpp
+index e69de29..9b44d9e 100644
+--- a/InputField.cpp
++++ b/InputField.cpp
+@@ -0,0 +1,133 @@
++#include "InputField.h"
++#include "Util.h"
++#include "Window.h"
++
++static std::wstring empty_str = L"";
++
++InputField::InputField() : text(empty_str),
++	placeholder(empty_str),
++	type(InputFieldType::TEXT),  // Initialize with a default type
++	id(Util::GenerateId()),            // Ensure GenerateId() is implemented
++	hWnd(nullptr),
++	window(nullptr),
++	hFont(nullptr) {}
++
++void InputField::SetText(const std::wstring text)
++{
++	if (!hWnd) return;
++	this->text = text;
++	if (initialized) SendMessage(hWnd, WM_SETTEXT, 0, (LPARAM)text.c_str());
++}
++
++std::wstring InputField::GetText() const
++{
++	return text;
++}
++
++void InputField::SetPosition(int x, int y)
++{
++	if (!hWnd) return;
++	this->x = x;
++	this->y = y;
++	if (initialized) SetWindowPos(hWnd, nullptr, x, y, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
++}
++
++void InputField::SetSize(int width, int height)
++{
++	if (!hWnd) return;
++	this->width = width;
++	this->height = height;
++	if (initialized) SetWindowPos(hWnd, nullptr, 0, 0, width, height, SWP_NOMOVE | SWP_NOZORDER);
++}
++
++void InputField::SetFont(HFONT font)
++{
++	if (!hWnd) return;
++	hFont = font;
++	if (initialized) SendMessage(hWnd, WM_SETFONT, (WPARAM)hFont, TRUE);
++}
++
++void InputField::SetParent(Window* parent)
++{
++	if (!parent) return;
++	window = parent;
++	if (initialized) ::SetParent(hWnd, parent->GetWindowHandle());
++}
++
++void InputField::Clear()
++{
++	if (!hWnd) return;
++	text = empty_str;
++	SetWindowText(hWnd, empty_str.c_str());
++}
++
++void InputField::Initialize()
++{
++	if (initialized) return;
++
++	DWORD style = WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL;
++	if (type == InputFieldType::PASSWORD) {
++		style |= ES_PASSWORD;
++	}
++	else if (type == InputFieldType::NUMBER) {
++		style |= ES_NUMBER;
++	}
++
++	hWnd = CreateWindowEx(
++		0,
++		L"EDIT",
++		text.c_str(),
++		style,
++		x, y,
++		width, height,
++		window ? window->GetWindowHandle() : nullptr,
++		(HMENU)id,
++		GetModuleHandle(nullptr),
++		nullptr
++	);
++
++	if (hWnd)
++	{
++		initialized = true;
++		SetFont(hFont);
++	}
++}
++
++InputField::~InputField()
++{
++	if (hWnd) {
++		DestroyWindow(hWnd);
++		hWnd = nullptr;
++		initialized = false;
++	}
++}
++
++void InputField::Show()
++{
++	if (!hWnd) return;
++	ShowWindow(hWnd, SW_SHOW);
++}
++
++void InputField::Hide() const
++{
++	if (!hWnd) return;
++	ShowWindow(hWnd, SW_HIDE);
++}
++
++void InputField::Enable() const
++{
++	if (!hWnd) return;
++	EnableWindow(hWnd, TRUE);
++}
++
++void InputField::Disable() const
++{
++	if (!hWnd) return;
++	EnableWindow(hWnd, FALSE);
++}
++
++void InputField::SetFocus() const
++{
++	if (!hWnd) return;
++	::SetFocus(hWnd);
++}
+diff --git a/InputField.h b/InputField.h
+index e69de29..3f34dfe 100644
+--- a/InputField.h
++++ b/InputField.h
+@@ -0,0 +1,58 @@
++#pragma once
++
++#include <windows.h>
++#include <string>
++
++enum class InputFieldType
++{
++	TEXT,
++	PASSWORD,
++	NUMBER,
++	EMAIL,
++	DATETIME,
++	DATE,
++	TIME,
++	TEL,
++	URL
++};
++
++class Window;
++
++class InputField
++{
++public:
++	InputField();
++	virtual ~InputField();
++	InputField(const InputField&) = delete;
++	InputField& operator=(const InputField&) = delete;
++	void SetText(const std::wstring text);
++	std::wstring GetText() const;
++	void SetPosition(int x, int y);
++	void SetSize(int width, int height);
++	void SetFont(HFONT font);
++	void SetParent(Window* window);
++	void Show();
++	void Hide() const;
++	void Enable() const;
++	void Disable() const;
++	void SetFocus() const;
++	void Clear();
++	HWND GetHandle() const { return hWnd; }
++	void Initialize();
++
++private:
++	std::wstring text;
++	std::wstring placeholder;
++
++	bool initialized = false;
++	int width = 100;
++	int height = 20;
++	int x = 0;
++	int y = 0;
++
++	InputFieldType type;
++	UINT id;
++	HWND hWnd;
++	Window* window;
++	HFONT hFont;
++};
+diff --git a/Menu.cpp b/Menu.cpp
+index 0e85ee1..5d588f4 100644
+--- a/Menu.cpp
++++ b/Menu.cpp
+@@ -1,39 +1,22 @@
+ #include "Menu.h"
+ #include "Window.h"
++#include <iostream>
++#include "Util.h"
+ 
+-static UINT s_nextMenuId = 1;
+-
+-static UINT GenerateId() {
+-    return s_nextMenuId++;
+-}
+-
+-Menu::Menu(MenuType type) : type(type), id(GenerateId()) {
+-    switch (type) {
+-    case MenuType::MainMenu:
+-        hMenu = CreateMenu();
+-        break;
+-    case MenuType::PopupMenu:
+-    case MenuType::SystemMenu:
+-        hMenu = CreatePopupMenu();
+-        break;
+-    }
++Menu::Menu(MenuType type) : type(type), id(Util::GenerateId()) {
++    std::cout << "Creating menu of type: " << (int)type << std::endl;
+ }
+ 
+ Menu& Menu::AddSubMenu(Menu *submenu) {
+-    if (!hMenu || !submenu->hMenu) {
+-        return *this;
+-    }
+-
+-    AppendMenuW(hMenu, MF_POPUP, (UINT_PTR)submenu->hMenu, submenu->label.c_str());
++    std::cout << "Adding submenu: " << submenu->id << std::endl;
+     subMenus.push_back(submenu);
+-
+     return *this;
+ }
+ 
+ Menu& Menu::AddOption(Option* option)
+ {
+     if (!hMenu) return *this;
+-    AppendMenuW(hMenu, MF_STRING, option->id, option->label.c_str());
++    // AppendMenuW(hMenu, MF_STRING, option->id, option->label.c_str());
+     options[option->id] = option;
+     return *this;
+ }
+@@ -45,27 +28,71 @@ Menu& Menu::AddDivider() {
+ 
+ void Menu::Register(Window* window, Menu *parent)
+ {
+-    if (!window || !hMenu) {
++    switch (type) {
++    case MenuType::MainMenu:
++        hMenu = CreateMenu();
++        if (!hMenu) {
++            std::cerr << "Failed to create MainMenu!" << std::endl;
++        }
++    case MenuType::PopupMenu:
++    case MenuType::SystemMenu:
++        hMenu = CreatePopupMenu();
++        if (!hMenu) {
++            std::cerr << "Failed to create PopupMenu or SystemMenu!" << std::endl;
++        }
++        break;
++    }
++
++    std::cout << "Menu object address: " << this << std::endl;
++    std::cout << "Menu type: " << (int) type << std::endl;
++    std::cout << "Menu hMenu handle: " << hMenu << std::endl;
++
++    std::cout << "Register - hMenu: " << hMenu << std::endl;
++
++    if (window == nullptr || hMenu == nullptr) {
++        std::cout << "Missing window or hMenu" << std::endl; 
+         return;
+     }
+-    return;
+ 
+     HWND hwnd = window->GetWindowHandle();
+ 
++    /*for (auto& pair : options)
++    {
++        std::cout << "Address of pair: " << &pair << std::endl;
++        if (pair.second != nullptr) {
++            std::cout << "Address of pair.second: " << pair.second << std::endl;
++            pair.second->Init(window, this);
++        } else {
++            std::cout << "Warning: pair.second is null!" << std::endl;
++        }
++    }*/
++
++    for (Menu *men : subMenus) {
++        if (men == nullptr) continue;
++        men->Register(window, this);
++    }
++
+     if (type == MenuType::MainMenu) {
+         SetMenu(hwnd, hMenu);
+         DrawMenuBar(hwnd);
++        return;
+     }
+ 
+-    for (auto& pair : options)
+-    {
+-        pair.second->Init(window, this);
+-    }
++    // testing here
+ 
+-    for (Menu *men : subMenus) {
+-        if (men == nullptr) continue;
+-        men->Register(window, this);
++    if (!parent) {
++        std::cout << "Missing parent for NON MainMenu type menu" << std::endl;
++        return;
+     }
++    std::cout << "Missing parent for NON MainMenu type menu" << std::endl;
++
++    AppendMenu(hMenu, MF_STRING, 1, L"&New");
++    AppendMenu(hMenu, MF_STRING, 2, L"&Open");
++    AppendMenu(hMenu, MF_STRING, 3, L"&Save");
++    AppendMenu(hMenu, MF_SEPARATOR, 0, NULL);
++    AppendMenu(hMenu, MF_STRING, 4, L"E&xit");
++
++    AppendMenu(parent->GetHandle(), MF_POPUP, (UINT_PTR)hMenu, label.c_str());
+ }
+ 
+ void Menu::PropagateClick(UINT id)
+@@ -87,7 +114,7 @@ Menu& Menu::SetLabel(const std::wstring& menuLabel) {
+     return *this;
+ }
+ 
+-Option::Option(std::wstring label) : label(label), id(GenerateId()) {}
++Option::Option(std::wstring label) : label(label), id(Util::GenerateId()) {}
+ 
+ void Option::Init(Window* wWindow, Menu* parent)
+ {
+diff --git a/Menu.h b/Menu.h
+index ecea91b..55e0ffe 100644
+--- a/Menu.h
++++ b/Menu.h
+@@ -24,6 +24,8 @@ enum class MenuType {
+ class Menu {
+ public:
+     explicit Menu(MenuType type = MenuType::MainMenu);
++    Menu(const Menu&) = delete;
++    Menu& operator=(const Menu&) = delete;
+     Menu& AddSubMenu(Menu* submenu);
+     Menu& AddOption(Option* option);
+     Menu& AddDivider();
+diff --git a/Util.cpp b/Util.cpp
+index e69de29..185d817 100644
+--- a/Util.cpp
++++ b/Util.cpp
+@@ -0,0 +1,8 @@
++#include "Util.h"
++#include <atomic>
++
++static std::atomic<UINT> s_nextMenuId = 1;
++
++UINT Util::GenerateId() {
++    return s_nextMenuId++;
++}
+\ No newline at end of file
+diff --git a/Util.h b/Util.h
+index e69de29..4ebe1a1 100644
+--- a/Util.h
++++ b/Util.h
+@@ -0,0 +1,7 @@
++#pragma once
++
++#include <windows.h>
++
++namespace Util {
++	UINT GenerateId();
++}
+\ No newline at end of file
+diff --git a/Window.cpp b/Window.cpp
+index 6c91119..c28f76a 100644
+--- a/Window.cpp
++++ b/Window.cpp
+@@ -62,9 +62,10 @@ void Window::RunMessageLoop() const {
+ 
+ void Window::RegisterComponents() {
+     if (menu) {
+-        SetMenu(hWnd, menu->GetHandle());
++        std::cout << menu->GetHandle() << std::endl;
+         menu->Register(this, nullptr);
+-        std::cout << "test" << std::endl;
++        // std::cout << "test" << std::endl;
++        SetMenu(hWnd, menu->GetHandle());
+         DrawMenuBar(hWnd);
+     }
+ }
+diff --git a/Window.h b/Window.h
+index 1ec4816..60f90df 100644
+Binary files a/Window.h and b/Window.h differ
+diff --git a/Windows.cpp b/Windows.cpp
+index f87a84b..48eecfe 100644
+--- a/Windows.cpp
++++ b/Windows.cpp
+@@ -27,4 +27,13 @@ LRESULT TestWindow::HandleMessage(HWND eventHandle, UINT message, WPARAM wParam,
+     default:
+         return DefWindowProc(eventHandle, message, wParam, lParam);
+     }
+-}
+\ No newline at end of file
++}
++
++LRESULT TestWindow2::HandleMessage(HWND eventHandle, UINT message, WPARAM wParam, LPARAM lParam)
++{
++    if (message == WM_CREATE) {
++        
++    }
++
++    return DefWindowProc(eventHandle, message, wParam, lParam);
++}
+diff --git a/Windows.h b/Windows.h
+index a13d8c9..68e1872 100644
+--- a/Windows.h
++++ b/Windows.h
+@@ -2,6 +2,8 @@
+ 
+ #include "Window.h"
+ #include "Resource.h"
++#include <iostream>
++#include "Menu.h"
+ 
+ class MainWindow : public Window {
+ public:
+@@ -17,8 +19,8 @@ class TestWindow : public Window {
+ public:
+     TestWindow(HINSTANCE hInstance, int nCmdShow)
+         : Window(hInstance, L"TestWindowClass", L"Car Edger Test", nCmdShow) {
+-        Menu men;
+-        Menu submen;
++        Menu *men = new Menu();
++        Menu submen(MenuType::PopupMenu);
+         Option open(L"&Open");
+         Option exit(L"&Exit");
+ 
+@@ -26,8 +28,18 @@ public:
+         submen.AddOption(&open);
+         submen.AddOption(&exit);
+ 
+-        men.AddSubMenu(&submen);
+-        RegisterMenu(&men);
++        men->AddSubMenu(&submen);
++        RegisterMenu(men);
++    }
++
++protected:
++    LRESULT HandleMessage(HWND eventHandle, UINT message, WPARAM wParam, LPARAM lParam);
++};
++
++class TestWindow2 : public Window {
++public:
++    TestWindow2(HINSTANCE hInstance, int nCmdShow)
++        : Window(hInstance, L"TestWindowClass", L"Car Edger Test", nCmdShow) {
+     }
+ 
+ protected:
+diff --git a/car_edger.vcxproj b/car_edger.vcxproj
+index ab3a933..5e3f6dc 100644
+--- a/car_edger.vcxproj
++++ b/car_edger.vcxproj
+@@ -130,16 +130,20 @@
+     <ClInclude Include="car_edger.h" />
+     <ClInclude Include="ClassRegisterer.h" />
+     <ClInclude Include="framework.h" />
++    <ClInclude Include="InputField.h" />
+     <ClInclude Include="Menu.h" />
+     <ClInclude Include="Resource.h" />
+     <ClInclude Include="targetver.h" />
++    <ClInclude Include="Util.h" />
+     <ClInclude Include="Window.h" />
+     <ClInclude Include="Windows.h" />
+   </ItemGroup>
+   <ItemGroup>
+     <ClCompile Include="car_edger.cpp" />
+     <ClCompile Include="ClassRegisterer.cpp" />
++    <ClCompile Include="InputField.cpp" />
+     <ClCompile Include="Menu.cpp" />
++    <ClCompile Include="Util.cpp" />
+     <ClCompile Include="Window.cpp" />
+     <ClCompile Include="Windows.cpp" />
+   </ItemGroup>
+diff --git a/car_edger.vcxproj.filters b/car_edger.vcxproj.filters
+index 1ba8f27..f44415d 100644
+--- a/car_edger.vcxproj.filters
++++ b/car_edger.vcxproj.filters
+@@ -39,6 +39,12 @@
+     <ClInclude Include="Menu.h">
+       <Filter>Header Files</Filter>
+     </ClInclude>
++    <ClInclude Include="InputField.h">
++      <Filter>Header Files</Filter>
++    </ClInclude>
++    <ClInclude Include="Util.h">
++      <Filter>Header Files</Filter>
++    </ClInclude>
+   </ItemGroup>
+   <ItemGroup>
+     <ClCompile Include="car_edger.cpp">
+@@ -56,6 +62,12 @@
+     <ClCompile Include="Menu.cpp">
+       <Filter>Source Files</Filter>
+     </ClCompile>
++    <ClCompile Include="InputField.cpp">
++      <Filter>Source Files</Filter>
++    </ClCompile>
++    <ClCompile Include="Util.cpp">
++      <Filter>Source Files</Filter>
++    </ClCompile>
+   </ItemGroup>
+   <ItemGroup>
+     <ResourceCompile Include="car_edger.rc">

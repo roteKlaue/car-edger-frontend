@@ -62,9 +62,10 @@ void Window::RunMessageLoop() const {
 
 void Window::RegisterComponents() {
     if (menu) {
-        SetMenu(hWnd, menu->GetHandle());
+        std::cout << menu->GetHandle() << std::endl;
         menu->Register(this, nullptr);
-        std::cout << "test" << std::endl;
+        // std::cout << "test" << std::endl;
+        SetMenu(hWnd, menu->GetHandle());
         DrawMenuBar(hWnd);
     }
 }
