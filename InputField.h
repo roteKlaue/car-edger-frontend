@@ -2,6 +2,7 @@
 
 #include <windows.h>
 #include <string>
+#include "Component.h"
 
 enum class InputFieldType
 {
@@ -18,41 +19,24 @@ enum class InputFieldType
 
 class Window;
 
-class InputField
+class InputField : public Component
 {
 public:
 	InputField();
-	virtual ~InputField();
 	InputField(const InputField&) = delete;
 	InputField& operator=(const InputField&) = delete;
 	void SetText(const std::wstring text);
+	void UpdateText(const std::wstring text);
+	void SetPlaceholder(const std::wstring text);
+	void SetKeepPlaceholder(bool keep) { keepPlaceholder = keep; };
 	std::wstring GetText() const;
-	void SetPosition(int x, int y);
-	void SetSize(int width, int height);
-	void SetFont(HFONT font);
-	void SetParent(Window* window);
-	void Show();
-	void Hide() const;
-	void Enable() const;
-	void Disable() const;
-	void SetFocus() const;
+	void Create() override;
 	void Clear();
-	HWND GetHandle() const { return hWnd; }
-	void Initialize();
 
 private:
 	std::wstring text;
 	std::wstring placeholder;
 
-	bool initialized = false;
-	int width = 100;
-	int height = 20;
-	int x = 0;
-	int y = 0;
-
+	bool keepPlaceholder = false;
 	InputFieldType type;
-	UINT id;
-	HWND hWnd;
-	Window* window;
-	HFONT hFont;
 };

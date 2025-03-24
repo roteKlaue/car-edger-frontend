@@ -45,7 +45,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, // handle to the current instanc
     AttachConsoleToStdout();
 
     // Create a Window object
-    TestWindow window(hInstance, nCmdShow);
+    TestWindow2 window(hInstance, nCmdShow);
 
     // Initialize the window
     if (!window.Init()) {

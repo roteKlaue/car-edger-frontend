@@ -42,6 +42,7 @@ bool Window::Init() {
 
     SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));                   // Store the Window object in the window's user data
 
+    RegisterComponents();                                                                      // Register the components
     ShowWindow(hWnd, nCmdShow);                                                                // Show the window
     UpdateWindow(hWnd);                                                                        // Update the window
 
@@ -67,6 +68,14 @@ void Window::RegisterComponents() {
         // std::cout << "test" << std::endl;
         SetMenu(hWnd, menu->GetHandle());
         DrawMenuBar(hWnd);
+    }
+
+    for (auto& pair : components) {
+        std::cout << "Component ID: " << pair.first << std::endl;
+        if (pair.second) {
+            pair.second->SetParent(this);
+            pair.second->Create();
+        }
     }
 }
 
@@ -102,7 +111,8 @@ LRESULT CALLBACK Window::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
     }
 
     if (message == WM_CREATE) {
-        pWindow->RegisterComponents();
+        // pWindow->RegisterComponents();
+        // UpdateWindow(pWindow->GetWindowHandle());
     }
 
     if (message == WM_DESTROY) {

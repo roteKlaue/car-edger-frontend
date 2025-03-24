@@ -1,22 +1,34 @@
 #include "InputField.h"
 #include "Util.h"
 #include "Window.h"
+#include <iostream>
+#include <commctrl.h>
 
 static std::wstring empty_str = L"";
 
-InputField::InputField() : text(empty_str),
+InputField::InputField() : Component(),
+	text(empty_str),
 	placeholder(empty_str),
-	type(InputFieldType::TEXT),  // Initialize with a default type
-	id(Util::GenerateId()),            // Ensure GenerateId() is implemented
-	hWnd(nullptr),
-	window(nullptr),
-	hFont(nullptr) {}
+	type(InputFieldType::TEXT)  // Initialize with a default type
+{}
 
 void InputField::SetText(const std::wstring text)
 {
-	if (!hWnd) return;
+	if (!handle) return;
 	this->text = text;
-	if (initialized) SendMessage(hWnd, WM_SETTEXT, 0, (LPARAM)text.c_str());
+	if (initialized) SendMessage(handle, WM_SETTEXT, 0, (LPARAM)text.c_str());
+}
+
+void InputField::UpdateText(const std::wstring text)
+{
+	if (!handle) return;
+	this->text = text;
+}
+
+void InputField::SetPlaceholder(const std::wstring text)
+{
+	placeholder = text;
+	if (initialized) SendMessage(handle, EM_SETCUEBANNER, keepPlaceholder, (LPARAM)text.c_str());
 }
 
 std::wstring InputField::GetText() const
@@ -24,46 +36,18 @@ std::wstring InputField::GetText() const
 	return text;
 }
 
-void InputField::SetPosition(int x, int y)
-{
-	if (!hWnd) return;
-	this->x = x;
-	this->y = y;
-	if (initialized) SetWindowPos(hWnd, nullptr, x, y, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
-}
-
-void InputField::SetSize(int width, int height)
-{
-	if (!hWnd) return;
-	this->width = width;
-	this->height = height;
-	if (initialized) SetWindowPos(hWnd, nullptr, 0, 0, width, height, SWP_NOMOVE | SWP_NOZORDER);
-}
-
-void InputField::SetFont(HFONT font)
-{
-	if (!hWnd) return;
-	hFont = font;
-	if (initialized) SendMessage(hWnd, WM_SETFONT, (WPARAM)hFont, TRUE);
-}
-
-void InputField::SetParent(Window* parent)
-{
-	if (!parent) return;
-	window = parent;
-	if (initialized) ::SetParent(hWnd, parent->GetWindowHandle());
-}
-
 void InputField::Clear()
 {
-	if (!hWnd) return;
+	if (!handle) return;
 	text = empty_str;
-	SetWindowText(hWnd, empty_str.c_str());
+	SetWindowText(handle, empty_str.c_str());
 }
 
-void InputField::Initialize()
+void InputField::Create()
 {
 	if (initialized) return;
+
+	std::cout << "Create called" << std::endl;
 
 	DWORD style = WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL;
 	if (type == InputFieldType::PASSWORD) {
@@ -73,8 +57,12 @@ void InputField::Initialize()
 		style |= ES_NUMBER;
 	}
 
-	hWnd = CreateWindowEx(
-		0,
+	std::cout << "Style: " << style << std::endl;
+	std::cout << "X,Y: " << x << "," << y << std::endl;
+	std::cout << "Width,Height: " << width << "," << height << std::endl;
+
+	handle = CreateWindowEx(
+		WS_EX_CLIENTEDGE,
 		L"EDIT",
 		text.c_str(),
 		style,
@@ -86,48 +74,9 @@ void InputField::Initialize()
 		nullptr
 	);
 
-	if (hWnd)
+	if (handle)
 	{
 		initialized = true;
 		SetFont(hFont);
 	}
-}
-
-InputField::~InputField()
-{
-	if (hWnd) {
-		DestroyWindow(hWnd);
-		hWnd = nullptr;
-		initialized = false;
-	}
-}
-
-void InputField::Show()
-{
-	if (!hWnd) return;
-	ShowWindow(hWnd, SW_SHOW);
-}
-
-void InputField::Hide() const
-{
-	if (!hWnd) return;
-	ShowWindow(hWnd, SW_HIDE);
-}
-
-void InputField::Enable() const
-{
-	if (!hWnd) return;
-	EnableWindow(hWnd, TRUE);
-}
-
-void InputField::Disable() const
-{
-	if (!hWnd) return;
-	EnableWindow(hWnd, FALSE);
-}
-
-void InputField::SetFocus() const
-{
-	if (!hWnd) return;
-	::SetFocus(hWnd);
 }
