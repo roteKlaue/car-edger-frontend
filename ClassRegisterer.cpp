@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "ClassRegisterer.h"
 
 ClassRegisterer* ClassRegisterer::GetInstance()
@@ -34,10 +35,10 @@ WNDCLASSEXW ClassRegisterer::getWindowClass(const std::wstring classname)
 
 bool ClassRegisterer::unregisterClasses()
 {
-	for (auto& pair : classCache)
-	{
-		if (!UnregisterClassW(pair.first.c_str(), pair.second.hInstance)) return false;
-	}
-	classCache.clear();
-	return true;
+    for (auto& pair : classCache)
+    {
+        if (!UnregisterClassW(pair.first.c_str(), pair.second.hInstance)) return false;
+    }
+    classCache.clear();
+    return true;
 }

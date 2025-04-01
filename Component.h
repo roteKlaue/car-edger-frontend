@@ -39,7 +39,6 @@ protected:
 	int height = 20;
 	int x = 0;
 	int y = 0;
-	
+
 	bool initialized = false;
 };
-

@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "Menu.h"
 #include "Window.h"
 #include <iostream>
@@ -7,7 +8,7 @@ Menu::Menu(MenuType type) : type(type), id(Util::GenerateId()) {
     std::cout << "Creating menu of type: " << (int)type << std::endl;
 }
 
-Menu& Menu::AddSubMenu(Menu *submenu) {
+Menu& Menu::AddSubMenu(Menu* submenu) {
     std::cout << "Adding submenu: " << submenu->id << std::endl;
     subMenus.push_back(submenu);
     return *this;
@@ -26,7 +27,7 @@ Menu& Menu::AddDivider() {
     return *this;
 }
 
-void Menu::Register(Window* window, Menu *parent)
+void Menu::Register(Window* window, Menu* parent)
 {
     switch (type) {
     case MenuType::MainMenu:
@@ -44,13 +45,13 @@ void Menu::Register(Window* window, Menu *parent)
     }
 
     std::cout << "Menu object address: " << this << std::endl;
-    std::cout << "Menu type: " << (int) type << std::endl;
+    std::cout << "Menu type: " << (int)type << std::endl;
     std::cout << "Menu hMenu handle: " << hMenu << std::endl;
 
     std::cout << "Register - hMenu: " << hMenu << std::endl;
 
     if (window == nullptr || hMenu == nullptr) {
-        std::cout << "Missing window or hMenu" << std::endl; 
+        std::cout << "Missing window or hMenu" << std::endl;
         return;
     }
 
@@ -67,7 +68,7 @@ void Menu::Register(Window* window, Menu *parent)
         }
     }*/
 
-    for (Menu *men : subMenus) {
+    for (Menu* men : subMenus) {
         if (men == nullptr) continue;
         men->Register(window, this);
     }

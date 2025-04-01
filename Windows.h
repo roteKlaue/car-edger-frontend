@@ -20,7 +20,7 @@ class TestWindow : public Window {
 public:
     TestWindow(HINSTANCE hInstance, int nCmdShow)
         : Window(hInstance, L"TestWindowClass", L"Car Edger Test", nCmdShow) {
-        Menu *men = new Menu();
+        Menu* men = new Menu();
         Menu submen(MenuType::PopupMenu);
         Option open(L"&Open");
         Option exit(L"&Exit");
@@ -44,10 +44,10 @@ public:
 
         inputField = std::make_shared<InputField>();
         inputField2 = std::make_shared<InputField>();
-        
+
         inputField2->SetPlaceholder(L"Choco");
         inputField2->SetPosition(20, 300);
-		inputField2->SetSize(200, 20);
+        inputField2->SetSize(200, 20);
 
         AddComponent(inputField);
         AddComponent(inputField2);

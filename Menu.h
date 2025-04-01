@@ -1,8 +1,3 @@
-// Menu.h : Menu bar menu handling class.
-// Author: Jan Koeck
-// Created: 2025/03/01
-//
-
 #pragma once
 
 #include <windows.h>
@@ -31,7 +26,7 @@ public:
     Menu& AddDivider();
     Menu& SetLabel(const std::wstring& menuLabel);
     HMENU GetHandle() const { return hMenu; }
-    void Register(Window* window, Menu *parent);
+    void Register(Window* window, Menu* parent);
     void PropagateClick(UINT id);
 
 private:
@@ -46,7 +41,7 @@ private:
 class Option {
 public:
     Option(std::wstring label);
-    void Init(Window *window, Menu *parent);
+    void Init(Window* window, Menu* parent);
     std::wstring label;
     virtual void OnClick() {};
     UINT id;

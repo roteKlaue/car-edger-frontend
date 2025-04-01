@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "InputField.h"
 #include "Util.h"
 #include "Window.h"
@@ -9,8 +10,7 @@ static std::wstring empty_str = L"";
 InputField::InputField() : Component(),
 	text(empty_str),
 	placeholder(empty_str),
-	type(InputFieldType::TEXT)  // Initialize with a default type
-{}
+	type(InputFieldType::TEXT){ }
 
 void InputField::SetText(const std::wstring text)
 {

@@ -28,4 +28,3 @@ public:
 	WNDCLASSEXW getWindowClass(const std::wstring classname);
 	bool unregisterClasses();
 };
-

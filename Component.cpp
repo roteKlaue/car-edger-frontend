@@ -1,11 +1,13 @@
+#include "pch.h"
 #include "Component.h"
 #include "Util.h"
 #include "Window.h"
 
-Component::Component() : id(Util::GenerateId()), 
-	handle(nullptr), 
-	window(nullptr), 
-	hFont(nullptr) {}
+Component::Component() : id(Util::GenerateId()),
+	handle(nullptr),
+	window(nullptr),
+	hFont(nullptr) {
+}
 
 Component::~Component()
 {

@@ -3,6 +3,7 @@
 // Created: 2025/02/26
 //
 
+#include "pch.h"
 #include "Window.h"
 #include "resource.h"
 #include "ClassRegisterer.h"
@@ -17,7 +18,8 @@
  * @param nCmdShow Flag that controls how the window is to be shown.
  */
 Window::Window(HINSTANCE hInstance, const std::wstring& className, const std::wstring& title, int nCmdShow, DWORD style)
-    : hInstance(hInstance), szWindowClass(className), szTitle(title), nCmdShow(nCmdShow), dwStyle(style), hWnd(nullptr), menu(nullptr) {}
+    : hInstance(hInstance), szWindowClass(className), szTitle(title), nCmdShow(nCmdShow), dwStyle(style), hWnd(nullptr), menu(nullptr) {
+}
 
 Window::~Window() {
     if (!hWnd) return;
@@ -31,7 +33,7 @@ Window::~Window() {
  */
 bool Window::Init() {
     ClassRegisterer* registerer = ClassRegisterer::GetInstance();
-	if (!registerer->classExists(szWindowClass)) {
+    if (!registerer->classExists(szWindowClass)) {
         auto windowClass = CreateWindowClass(hInstance, szWindowClass);                        // Create the window class
         if (!registerer->registerClass(szWindowClass, windowClass)) return false;              // Register the window class
     }
@@ -81,7 +83,7 @@ void Window::RegisterComponents() {
 
 WNDCLASSEXW Window::CreateWindowClass(HINSTANCE hInstance, std::wstring className)
 {
-    WNDCLASSEXW wcex { 0 };
+    WNDCLASSEXW wcex{ 0 };
 
     wcex.cbSize = sizeof(WNDCLASSEX);
     wcex.style = CS_HREDRAW | CS_VREDRAW;
@@ -106,7 +108,8 @@ LRESULT CALLBACK Window::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
         CREATESTRUCT* pCreate = reinterpret_cast<CREATESTRUCT*>(lParam);
         pWindow = static_cast<Window*>(pCreate->lpCreateParams);
         SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pWindow));
-    } else {
+    }
+    else {
         pWindow = reinterpret_cast<Window*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
     }
 
@@ -123,3 +126,4 @@ LRESULT CALLBACK Window::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
     if (pWindow) return pWindow->HandleMessage(hWnd, message, wParam, lParam);
     return DefWindowProc(hWnd, message, wParam, lParam);
 }
+

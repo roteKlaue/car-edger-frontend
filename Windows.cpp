@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "Windows.h"
 
 LRESULT MainWindow::HandleMessage(HWND eventHandle, UINT message, WPARAM wParam, LPARAM lParam)
