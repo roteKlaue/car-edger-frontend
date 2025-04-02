@@ -78,5 +78,6 @@ void InputField::Create()
 	{
 		initialized = true;
 		SetFont(hFont);
+		if (placeholder.length() > 0) SendMessage(handle, EM_SETCUEBANNER, keepPlaceholder, (LPARAM)placeholder.c_str());
 	}
 }

@@ -8,10 +8,7 @@
 
 class MainWindow : public Window {
 public:
-    MainWindow(HINSTANCE hInstance, int nCmdShow)
-        : Window(hInstance, L"DefaultWindowClass", L"Car Edger", nCmdShow) {
-        SetMenuResource(IDC_CAREDGER);
-    }
+    MainWindow(HINSTANCE hInstance, int nCmdShow);
 protected:
     LRESULT HandleMessage(HWND eventHandle, UINT message, WPARAM wParam, LPARAM lParam);
 };
@@ -30,7 +27,7 @@ public:
         submen.AddOption(&exit);
 
         men->AddSubMenu(&submen);
-        RegisterMenu(men);
+        // RegisterMenu(men);
     }
 
 protected:

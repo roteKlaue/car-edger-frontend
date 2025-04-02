@@ -24,7 +24,7 @@ public:
     bool Init();
     void RunMessageLoop() const;
     HWND GetWindowHandle() const { return hWnd; }
-    void RegisterMenu(Menu* men) { menu = men; }
+    // RegisterMenu(Menu* men) { menu = men; }
     void RegisterComponents();
     void AddComponent(std::shared_ptr<Component> component) { components[component->GetID()] = component; }
 

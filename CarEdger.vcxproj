@@ -146,7 +146,7 @@
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Util.h" />
     <ClInclude Include="Window.h" />
-    <ClInclude Include="Windows.h" />
+    <ClInclude Include="WindowsDefenitions.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CarEdger.cpp" />
@@ -162,7 +162,7 @@
     </ClCompile>
     <ClCompile Include="Util.cpp" />
     <ClCompile Include="Window.cpp" />
-    <ClCompile Include="Windows.cpp" />
+    <ClCompile Include="WindowsDefenitions.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="CarEdger.rc" />

@@ -48,7 +48,7 @@
     <ClInclude Include="Menu.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Windows.h">
+    <ClInclude Include="WindowsDefenitions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -77,7 +77,7 @@
     <ClCompile Include="Menu.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Windows.cpp">
+    <ClCompile Include="WindowsDefenitions.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -67,7 +67,6 @@ void Window::RegisterComponents() {
     if (menu) {
         std::cout << menu->GetHandle() << std::endl;
         menu->Register(this, nullptr);
-        // std::cout << "test" << std::endl;
         SetMenu(hWnd, menu->GetHandle());
         DrawMenuBar(hWnd);
     }
