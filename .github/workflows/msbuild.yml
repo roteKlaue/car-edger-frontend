@@ -53,7 +53,7 @@ jobs:
             echo "VERSION=$($matches[0])" >> $env:GITHUB_ENV
           } else {
             echo "No version found"
-            exit 1
+            exit 0
           }
         shell: pwsh
       - name: Skip release if no version found
