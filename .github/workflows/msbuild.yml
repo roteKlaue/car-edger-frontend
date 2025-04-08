@@ -51,20 +51,20 @@ jobs:
           $VERSION = (git log -1 --pretty=%B) -match "\b\d+\.\d+\.\d+\b" | Out-Null
           if ($matches) {
             echo "VERSION=$($matches[0])" >> $env:GITHUB_ENV
-          } else {
-            echo "No version found"
-            exit 0
           }
         shell: pwsh
       - name: Skip release if no version found
-        if: env.VERSION == ''
-        run: exit 0 
-      
+        if: env.VERSION == ''  
+        run: echo "No version found, skipping release."
+        continue-on-error: true         
+  
       - name: Create ZIP Archive
+        if: env.VERSION != ''
         run: Compress-Archive -Path x64/Release/* -DestinationPath x64/build-output.zip
         shell: pwsh
-        
+  
       - name: Create GitHub Release
+        if: env.VERSION != ''
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ env.VERSION }}
