@@ -58,7 +58,7 @@ jobs:
         shell: pwsh
       - name: Skip release if no version found
         if: env.VERSION == ''
-        run: exit 1 
+        run: exit 0 
       
       - name: Create ZIP Archive
         run: Compress-Archive -Path x64/Release/* -DestinationPath x64/build-output.zip
