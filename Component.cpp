@@ -9,15 +9,6 @@ Component::Component() : id(Util::GenerateId()),
 	hFont(nullptr) {
 }
 
-Component::~Component()
-{
-	if (handle) {
-		DestroyWindow(handle);
-		handle = nullptr;
-		initialized = false;
-	}
-}
-
 void Component::SetPosition(int x, int y)
 {
 	this->x = x;

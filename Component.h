@@ -9,7 +9,7 @@ class Component
 {
 public:
 	Component();
-	virtual ~Component();
+	virtual ~Component() = default;
 	virtual void Create() = 0;
 	virtual void Show(int cmdShow) const;
 	virtual void Hide() const;
@@ -25,7 +25,7 @@ public:
 	virtual int GetID() const { return id; };
 	virtual HWND GetHandle() const { return handle; };
 
-	virtual void SetText(const std::wstring text) = 0;
+	virtual void SetText(const std::wstring& text) = 0;
 	virtual std::wstring GetText() const = 0;
 	virtual void HandleCommand(WPARAM wParam, LPARAM lParam) {};
 

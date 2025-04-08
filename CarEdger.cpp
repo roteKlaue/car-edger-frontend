@@ -7,7 +7,7 @@
 #include "ClassRegisterer.h"
 #include "framework.h"
 #include "CarEdger.h"
-#include "WindowsDefenitions.h"
+#include "WindowDefenitions.h"
 #include <iostream>
 
 static void AttachConsoleToStdout() {

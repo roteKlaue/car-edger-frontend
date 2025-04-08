@@ -5,7 +5,8 @@
 #include <iostream>
 #include "Menu.h"
 #include "InputField.h"
-
+#include "Text.h"
+    
 class MainWindow : public Window {
 public:
     MainWindow(HINSTANCE hInstance, int nCmdShow);
@@ -36,22 +37,22 @@ protected:
 
 class TestWindow2 : public Window {
 public:
-    TestWindow2(HINSTANCE hInstance, int nCmdShow)
-        : Window(hInstance, L"TestWindowClass", L"Car Edger Test", nCmdShow) {
+    TestWindow2(HINSTANCE hInstance, int nCmdShow);
 
-        inputField = std::make_shared<InputField>();
-        inputField2 = std::make_shared<InputField>();
+protected:
+    LRESULT HandleMessage(HWND eventHandle, UINT message, WPARAM wParam, LPARAM lParam);
+    std::shared_ptr<Text> text;
+    std::shared_ptr<InputField> inputField2;
+};
 
-        inputField2->SetPlaceholder(L"Choco");
-        inputField2->SetPosition(20, 300);
-        inputField2->SetSize(200, 20);
 
-        AddComponent(inputField);
-        AddComponent(inputField2);
+class LoginWindow : public Window {
+public:
+    LoginWindow(HINSTANCE hInstance, int nCmdShow)
+        : Window(hInstance, L"LoginWindowClass", L"Car Edger Login", nCmdShow) {
+        SetMenuResource(IDC_MAIN_WINDOW_MENU);
     }
 
 protected:
     LRESULT HandleMessage(HWND eventHandle, UINT message, WPARAM wParam, LPARAM lParam);
-    std::shared_ptr<InputField> inputField;
-    std::shared_ptr<InputField> inputField2;
 };

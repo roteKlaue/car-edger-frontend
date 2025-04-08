@@ -12,17 +12,10 @@ InputField::InputField() : Component(),
 	placeholder(empty_str),
 	type(InputFieldType::TEXT){ }
 
-void InputField::SetText(const std::wstring text)
+void InputField::SetText(const std::wstring& text)
 {
-	if (!handle) return;
 	this->text = text;
 	if (initialized) SendMessage(handle, WM_SETTEXT, 0, (LPARAM)text.c_str());
-}
-
-void InputField::UpdateText(const std::wstring text)
-{
-	if (!handle) return;
-	this->text = text;
 }
 
 void InputField::SetPlaceholder(const std::wstring text)

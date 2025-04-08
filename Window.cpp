@@ -4,6 +4,7 @@
 //
 
 #include "pch.h"
+#include "Text.h"
 #include "Window.h"
 #include "resource.h"
 #include "ClassRegisterer.h"
@@ -115,6 +116,45 @@ LRESULT CALLBACK Window::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
     if (message == WM_CREATE) {
         // pWindow->RegisterComponents();
         // UpdateWindow(pWindow->GetWindowHandle());
+    }
+
+	if (message == WM_COMMAND) {
+		if (pWindow && pWindow->menu) {
+			pWindow->menu->PropagateClick(LOWORD(wParam));
+		}
+	}
+
+    if (message == WM_PAINT) {
+		PAINTSTRUCT ps;
+		HDC hdc = BeginPaint(hWnd, &ps);
+		FillRect(hdc, &ps.rcPaint, (HBRUSH)(COLOR_WINDOW + 1));
+
+		for (auto& pair : pWindow->components) {
+			if (!pair.second) {
+                continue;
+			}
+
+            if (auto derived = std::dynamic_pointer_cast<Text>(pair.second)) {
+				std::wstring text = derived->GetText();
+				SetBkMode(hdc, TRANSPARENT);
+
+                HFONT hFont = derived->GetFont();
+                HFONT hOldFont = nullptr;
+
+                if (hFont) {
+                    hOldFont = (HFONT)SelectObject(hdc, hFont);
+                }
+
+                TextOut(hdc, derived->GetX(), derived->GetY(), text.c_str(), text.length());
+
+                if (hOldFont) {
+                    SelectObject(hdc, hOldFont);
+                }
+			}
+		}
+
+        EndPaint(hWnd, &ps);
+        return 0;
     }
 
     if (message == WM_DESTROY) {

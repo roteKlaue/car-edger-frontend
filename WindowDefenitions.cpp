@@ -1,5 +1,6 @@
 #include "pch.h"
-#include "WindowsDefenitions.h"
+#include "WindowDefenitions.h"
+#include "Text.h"
 
 INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -54,26 +55,30 @@ LRESULT TestWindow::HandleMessage(HWND eventHandle, UINT message, WPARAM wParam,
     }
 }
 
+TestWindow2::TestWindow2(HINSTANCE hInstance, int nCmdShow) 
+    : Window(hInstance, L"TestWindowClass", L"Car Edger Test", nCmdShow) {
+    SetMenuResource(IDC_MAIN_WINDOW_MENU);
+
+    inputField2 = std::make_shared<InputField>();
+    text = std::make_shared<Text>();
+
+	text->SetText(L"Welcome to Car Edger");
+	text->SetPosition(20, 20);
+
+    inputField2->SetPlaceholder(L"Choco");
+    inputField2->SetPosition(20, 300);
+    inputField2->SetSize(200, 20);
+
+    AddComponent(text);
+    AddComponent(inputField2);
+}
+
 LRESULT TestWindow2::HandleMessage(HWND eventHandle, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    if (message == WM_CREATE) {
-        // inputField->Show(SW_SHOW);
-        inputField2->Show(SW_SHOW);
-    }
+    return DefWindowProc(eventHandle, message, wParam, lParam);
+}
 
-    if (message == WM_PAINT) {
-        PAINTSTRUCT ps;
-        HDC hdc = BeginPaint(GetWindowHandle(), &ps);
-
-        const wchar_t* text = L"Welcome";
-        int x = 50;
-        int y = 50;
-
-        TextOut(hdc, x, y, text, wcslen(text));
-
-        EndPaint(GetWindowHandle(), &ps);
-        return 0;
-    }
-
+LRESULT LoginWindow::HandleMessage(HWND eventHandle, UINT message, WPARAM wParam, LPARAM lParam)
+{
     return DefWindowProc(eventHandle, message, wParam, lParam);
 }

@@ -144,9 +144,10 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="Text.h" />
     <ClInclude Include="Util.h" />
     <ClInclude Include="Window.h" />
-    <ClInclude Include="WindowsDefenitions.h" />
+    <ClInclude Include="WindowDefenitions.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CarEdger.cpp" />
@@ -160,9 +161,10 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Text.cpp" />
     <ClCompile Include="Util.cpp" />
     <ClCompile Include="Window.cpp" />
-    <ClCompile Include="WindowsDefenitions.cpp" />
+    <ClCompile Include="WindowDefenitions.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="CarEdger.rc" />
