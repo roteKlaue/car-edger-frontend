@@ -22,13 +22,17 @@ jobs:
       - name: Add MSBuild to PATH
         uses: microsoft/setup-msbuild@v1.0.2
 
-      - name: Install nlohmann/json dependency
+      - name: Install vcpkg
         run: |
-          nuget install nlohmann.json -OutputDirectory packages
+          git clone https://github.com/microsoft/vcpkg.git
+          ./vcpkg/bootstrap-vcpkg.sh
+      
+      - name: Install dependencies with vcpkg
+        run: ./vcpkg install nlohmann-json curl
 
-      - name: Install curl (via Chocolatey)
+      - name: Integrate vcpkg with MSBuild
         run: |
-          choco install curl
+          ./vcpkg integrate install
 
       - name: Restore NuGet packages
         run: nuget restore ${{ env.SOLUTION_FILE_PATH }}
