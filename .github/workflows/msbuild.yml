@@ -28,11 +28,11 @@ jobs:
           ./vcpkg/bootstrap-vcpkg.sh
       
       - name: Install dependencies with vcpkg
-        run: ./vcpkg install nlohmann-json curl
+        run: ./vcpkg/vcpkg install nlohmann-json curl
 
       - name: Integrate vcpkg with MSBuild
         run: |
-          ./vcpkg integrate install
+          ./vcpkg/vcpkg integrate install
 
       - name: Restore NuGet packages
         run: nuget restore ${{ env.SOLUTION_FILE_PATH }}
