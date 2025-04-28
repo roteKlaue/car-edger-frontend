@@ -26,4 +26,4 @@ jobs:
 
       - name: Build with MSBuild
         run: |
-          msbuild YourProject.sln /p:Configuration=Release
+          msbuild CarEdger.sln /p:Configuration=Release
