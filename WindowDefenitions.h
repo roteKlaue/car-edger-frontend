@@ -6,6 +6,8 @@
 #include "Menu.h"
 #include "InputField.h"
 #include "Text.h"
+#include "Button.h"
+#include "Util.h"
     
 class MainWindow : public Window {
 public:
@@ -41,6 +43,7 @@ public:
 
 protected:
     LRESULT HandleMessage(HWND eventHandle, UINT message, WPARAM wParam, LPARAM lParam);
+	void HandleFileMenuPress(UINT id) override;
     std::shared_ptr<Text> text;
     std::shared_ptr<InputField> inputField2;
 };
@@ -48,11 +51,16 @@ protected:
 
 class LoginWindow : public Window {
 public:
-    LoginWindow(HINSTANCE hInstance, int nCmdShow)
-        : Window(hInstance, L"LoginWindowClass", L"Car Edger Login", nCmdShow) {
-        SetMenuResource(IDC_MAIN_WINDOW_MENU);
-    }
+    LoginWindow(HINSTANCE hInstance, int nCmdShow);
+
+    bool Init() override;
 
 protected:
     LRESULT HandleMessage(HWND eventHandle, UINT message, WPARAM wParam, LPARAM lParam);
+	std::shared_ptr<InputField> passwordField;
+    std::shared_ptr<InputField> usernameField;
+    std::shared_ptr<Text> loginText;
+    std::shared_ptr<Text> usernameLabel;
+    std::shared_ptr<Text> passwordLabel;
+	std::shared_ptr<Button> loginButton;
 };

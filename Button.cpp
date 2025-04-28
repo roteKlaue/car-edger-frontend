@@ -44,7 +44,11 @@ void Button::Create()
 
 void Button::HandleCommand(WPARAM wParam, LPARAM lParam)
 {
-	if (HIWORD(wParam) == BN_CLICKED && LOWORD(wParam) == id) {
-		if (onClick) onClick();
-	}
+    UINT notif = HIWORD(wParam);
+    UINT ctrlId = LOWORD(wParam);
+
+    if (notif == BN_CLICKED && ctrlId == id && onClick)
+    {
+        onClick();
+    }
 }

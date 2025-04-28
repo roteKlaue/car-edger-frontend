@@ -9,6 +9,9 @@
 #include "CarEdger.h"
 #include "WindowDefenitions.h"
 #include <iostream>
+#include <nlohmann/json.hpp>
+
+using json = nlohmann::json;
 
 static void AttachConsoleToStdout() {
     AllocConsole(); // Allocate a new console window
@@ -49,7 +52,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, // handle to the current instanc
 #endif
 
     // Create a Window object
-    TestWindow2 window(hInstance, nCmdShow);
+    LoginWindow window(hInstance, nCmdShow);
 
     // Initialize the window
     if (!window.Init()) {

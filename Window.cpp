@@ -113,15 +113,20 @@ LRESULT CALLBACK Window::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
         pWindow = reinterpret_cast<Window*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
     }
 
+    if (message == WM_DESTROY) {
+        PostQuitMessage(0);
+        return 0;
+    }
+
+	if (!pWindow) return DefWindowProc(hWnd, message, wParam, lParam);
+
     if (message == WM_CREATE) {
         // pWindow->RegisterComponents();
         // UpdateWindow(pWindow->GetWindowHandle());
     }
 
 	if (message == WM_COMMAND) {
-		if (pWindow && pWindow->menu) {
-			pWindow->menu->PropagateClick(LOWORD(wParam));
-		}
+        pWindow->HandleCommandEvent(wParam, lParam);
 	}
 
     if (message == WM_PAINT) {
@@ -135,7 +140,9 @@ LRESULT CALLBACK Window::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 			}
 
             if (auto derived = std::dynamic_pointer_cast<Text>(pair.second)) {
-				std::wstring text = derived->GetText();
+                if (!derived->GetVisible()) continue;
+
+                std::wstring text = derived->GetText();
 				SetBkMode(hdc, TRANSPARENT);
 
                 HFONT hFont = derived->GetFont();
@@ -157,12 +164,23 @@ LRESULT CALLBACK Window::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
         return 0;
     }
 
-    if (message == WM_DESTROY) {
-        PostQuitMessage(0);
-        return 0;
-    }
-
-    if (pWindow) return pWindow->HandleMessage(hWnd, message, wParam, lParam);
-    return DefWindowProc(hWnd, message, wParam, lParam);
+    return pWindow->HandleMessage(hWnd, message, wParam, lParam);
 }
 
+void Window::Resize(int clientWidth, int clientHeight) const {
+    if (!hWnd) return;
+
+    RECT rc = { 0, 0, clientWidth, clientHeight };
+    AdjustWindowRect(&rc, dwStyle, menuResource != -1);
+
+    int totalW = rc.right - rc.left;
+    int totalH = rc.bottom - rc.top;
+
+    SetWindowPos(
+        hWnd,
+        nullptr,
+        0, 0,
+        totalW, totalH,
+        SWP_NOMOVE | SWP_NOZORDER | SWP_FRAMECHANGED
+    );
+}

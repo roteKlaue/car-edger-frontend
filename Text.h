@@ -14,9 +14,12 @@ public:
 
 	void SetText(const std::wstring& text) override;
 	std::wstring GetText() const override { return text; };
+	bool GetVisible() const { return visible; };
+	void SetVisible(bool visible) override { this->visible = visible; };
 
 private:
 	COLOR16 color = 0;
+	bool visible = true;
 	std::wstring text = L"";
 };
 

@@ -36,6 +36,21 @@ void InputField::Clear()
 	SetWindowText(handle, empty_str.c_str());
 }
 
+void InputField::HandleCommand(WPARAM wParam, LPARAM lParam)
+{
+	UINT notif = HIWORD(wParam);
+	UINT ctrlId = LOWORD(wParam);
+
+	if (ctrlId != id) return;
+	if (notif != EN_CHANGE) return;
+	
+	wchar_t buffer[512];
+	GetWindowText(handle, buffer, 512);
+	text = buffer;
+
+	if (onChange) onChange();
+}
+
 void InputField::Create()
 {
 	if (initialized) return;

@@ -78,6 +78,73 @@ LRESULT TestWindow2::HandleMessage(HWND eventHandle, UINT message, WPARAM wParam
     return DefWindowProc(eventHandle, message, wParam, lParam);
 }
 
+void TestWindow2::HandleFileMenuPress(UINT id)
+{
+	
+}
+
+LoginWindow::LoginWindow(HINSTANCE hInstance, int nCmdShow)
+    : Window(hInstance, L"LoginWindowClass", L"Car Edger Login", nCmdShow,
+        WS_OVERLAPPED |
+        WS_CAPTION |
+        WS_SYSMENU |
+        WS_MINIMIZEBOX) {
+    SetMenuResource(IDC_MAIN_WINDOW_MENU);
+    HFONT largeFont = Util::CreatePointFont(16);
+    HFONT largeXXLFont = Util::CreatePointFont(22);
+
+    usernameField = std::make_shared<InputField>();
+    usernameField->SetPlaceholder(L"Username");
+    usernameField->SetPosition(20, 100);
+    usernameField->SetFont(largeFont);
+
+    passwordField = std::make_shared<InputField>();
+    passwordField->SetPlaceholder(L"Password");
+    passwordField->SetType(InputFieldType::PASSWORD);
+    passwordField->SetPosition(20, 200);
+    passwordField->SetFont(largeFont);
+
+    loginText = std::make_shared<Text>();
+    loginText->SetText(L"Login to Car Edger");
+    loginText->SetPosition(10, 20);
+    loginText->SetFont(largeXXLFont);
+
+    usernameLabel = std::make_shared<Text>();
+    usernameLabel->SetPosition(20, 80);
+    usernameLabel->SetText(L"Username:");
+
+    passwordLabel = std::make_shared<Text>();
+    passwordLabel->SetPosition(20, 180);
+    passwordLabel->SetText(L"Password:");
+
+    loginButton = std::make_shared<Button>();
+    loginButton->SetText(L"Login");
+    loginButton->SetPosition(50, 260);
+    loginButton->SetSize(150, 40);
+    loginButton->SetFont(largeFont);
+    loginButton->SetOnClick([this]() {
+        std::wcout << L"[DEBUG] Login button clicked." << std::endl;
+        std::wcout << L"[DEBUG] Username: " << usernameField->GetText() << std::endl;
+        std::wcout << L"[DEBUG] Password: " << passwordField->GetText() << std::endl;
+    });
+
+    AddComponent(loginText);
+    AddComponent(usernameLabel);
+    AddComponent(passwordLabel);
+    AddComponent(passwordField);
+    AddComponent(usernameField);
+    AddComponent(loginButton);
+}
+
+bool LoginWindow::Init()
+{
+	if (!Window::Init()) return false;
+    Resize(260, 350);
+    passwordField->SetSize(220, 40);
+    usernameField->SetSize(220, 40);
+    return true;
+}
+
 LRESULT LoginWindow::HandleMessage(HWND eventHandle, UINT message, WPARAM wParam, LPARAM lParam)
 {
     return DefWindowProc(eventHandle, message, wParam, lParam);

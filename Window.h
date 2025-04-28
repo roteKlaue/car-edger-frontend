@@ -21,14 +21,23 @@ public:
         DWORD style = WS_OVERLAPPEDWINDOW);
     virtual ~Window();
 
-    bool Init();
+    virtual bool Init();
     void RunMessageLoop() const;
     HWND GetWindowHandle() const { return hWnd; }
+    void Resize(int clientWidth, int clientHeight) const;
     // RegisterMenu(Menu* men) { menu = men; }
     void RegisterComponents();
     void AddComponent(std::shared_ptr<Component> component) { components[component->GetID()] = component; }
+	void HandleCommandEvent(WPARAM wParam, LPARAM lParam) {
+        HandleFileMenuPress(LOWORD(wParam));
+		auto it = components.find(LOWORD(wParam));
+		if (it != components.end()) {
+			it->second->HandleCommand(wParam, lParam);
+		}
+	}
 
 protected:
+    virtual void HandleFileMenuPress(UINT id) {};
     virtual LRESULT HandleMessage(HWND eventHandle, UINT message, WPARAM wParam, LPARAM lParam) = 0;
     void SetMenuResource(WORD resource) { menuResource = resource; }
 

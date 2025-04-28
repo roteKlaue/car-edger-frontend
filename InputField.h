@@ -3,6 +3,7 @@
 #include <windows.h>
 #include <string>
 #include "Component.h"
+#include <functional>
 
 enum class InputFieldType
 {
@@ -26,11 +27,15 @@ public:
 	InputField(const InputField&) = delete;
 	InputField& operator=(const InputField&) = delete;
 	void SetText(const std::wstring& text) override;
+	void SetType(const InputFieldType type) { this->type = type; };
 	void SetPlaceholder(const std::wstring text);
 	void SetKeepPlaceholder(bool keep) { keepPlaceholder = keep; };
 	std::wstring GetText() const;
 	void Create() override;
 	void Clear();
+
+	void HandleCommand(WPARAM wParam, LPARAM lParam) override;
+	void SetOnChange(std::function<void()> callback) { onChange = std::move(callback); }
 
 private:
 	std::wstring text;
@@ -38,4 +43,5 @@ private:
 
 	bool keepPlaceholder = false;
 	InputFieldType type;
+	std::function<void()> onChange;
 };
