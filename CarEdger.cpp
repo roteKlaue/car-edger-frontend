@@ -9,14 +9,13 @@
 #include "CarEdger.h"
 #include "WindowDefenitions.h"
 #include <iostream>
-#include <nlohmann/json.hpp>
-
-using json = nlohmann::json;
+#include "HttpClient.h"
 
 static void AttachConsoleToStdout() {
     AllocConsole(); // Allocate a new console window
     // Redirect standard output to the console
     FILE* f;
+    SetConsoleOutputCP(CP_UTF8);
     freopen_s(&f, "CONOUT$", "w", stdout);
 }
 

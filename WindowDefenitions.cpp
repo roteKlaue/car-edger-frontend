@@ -1,6 +1,9 @@
 #include "pch.h"
 #include "WindowDefenitions.h"
 #include "Text.h"
+#include <nlohmann/json.hpp>
+
+using json = nlohmann::json;
 
 INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -97,10 +100,12 @@ LoginWindow::LoginWindow(HINSTANCE hInstance, int nCmdShow)
         WS_OVERLAPPED |
         WS_CAPTION |
         WS_SYSMENU |
-        WS_MINIMIZEBOX) {
+        WS_MINIMIZEBOX,
+        true) {
     SetMenuResource(IDC_LOGIN_MENU);
     HFONT largeFont = Util::CreatePointFont(16);
     HFONT largeXXLFont = Util::CreatePointFont(22);
+    Resize(260, 350);
 
     usernameField = std::make_shared<InputField>();
     usernameField->SetPlaceholder(L"Username");
@@ -135,8 +140,22 @@ LoginWindow::LoginWindow(HINSTANCE hInstance, int nCmdShow)
     loginButton->SetFont(largeFont);
     loginButton->SetOnClick([this]() {
         std::wcout << L"[DEBUG] Login button clicked." << std::endl;
-        std::wcout << L"[DEBUG] Username: " << usernameField->GetText() << std::endl;
-        std::wcout << L"[DEBUG] Password: " << passwordField->GetText() << std::endl;
+
+        std::wstring username = usernameField->GetText();
+        std::wstring password = passwordField->GetText();
+
+        std::wcout << L"[DEBUG] Username: " << username << std::endl;
+        std::wcout << L"[DEBUG] Password: " << password << std::endl;
+
+        std::string usernameStr = Util::to_utf8(username);
+        std::string passwordStr = Util::to_utf8(password);
+
+		json jsonObject = {
+			{"username", usernameStr },
+			{"password", passwordStr }
+        };
+
+        std::cout << "[DEBUG] Resulting JSON: " << jsonObject.dump(2) << std::endl;
     });
 
     AddComponent(loginText);
@@ -145,13 +164,6 @@ LoginWindow::LoginWindow(HINSTANCE hInstance, int nCmdShow)
     AddComponent(passwordField);
     AddComponent(usernameField);
     AddComponent(loginButton);
-}
-
-bool LoginWindow::Init()
-{
-	if (!Window::Init()) return false;
-    Resize(260, 350);
-    return true;
 }
 
 void LoginWindow::HandleFileMenuPress(UINT id)

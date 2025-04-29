@@ -53,8 +53,6 @@ class LoginWindow : public Window {
 public:
     LoginWindow(HINSTANCE hInstance, int nCmdShow);
 
-    bool Init() override;
-
 protected:
     void HandleFileMenuPress(UINT id) override;
     LRESULT HandleMessage(HWND eventHandle, UINT message, WPARAM wParam, LPARAM lParam);
