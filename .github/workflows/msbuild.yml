@@ -30,4 +30,4 @@ jobs:
         
         
       - name: Build solution
-        run: msbuild MyApp.sln /m /p:Configuration=Release /p:Platform=x64 :contentReference[oaicite:6]{index=6
+        run: msbuild MyApp.sln /m /p:Configuration=Release /p:Platform=x64 :contentReference[oaicite:6]{index=6}
