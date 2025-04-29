@@ -20,14 +20,17 @@ jobs:
       - name: Setup anew (or from cache) vcpkg (and does not build any package)
         uses: lukka/run-vcpkg@v11
         with:
-          manifestPath: '.' 
-          triplet: 'x64-windows'
-          cache: true
-          logCollection: true :contentReference[oaicite:5]{index=5}
+          vcpkgDirectory: vcpkg
+          runVcpkgInstall: true
+          runVcpkgFormatString: >-
+            [`install`,`--recurse`,`--clean-after-build`,
+             `--triplet`,`x64-windows`,
+             `--x-manifest-root`,`$[env.GITHUB_WORKSPACE]`]
+          doNotCache: false
 
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
         
         
       - name: Build solution
-        run: msbuild MyApp.sln /m /p:Configuration=Release /p:Platform=x64 :contentReference[oaicite:6]{index=6}
+        run: msbuild CarEdger.sln /m /p:Configuration=Release /p:Platform=x64      
