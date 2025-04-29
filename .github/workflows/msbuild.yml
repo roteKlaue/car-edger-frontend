@@ -20,9 +20,17 @@ jobs:
       - name: Bootstrap vcpkg
         run: .\vcpkg\bootstrap-vcpkg.bat
 
-      - name: Install vcpkg dependencies
-        run: |
-          .\vcpkg\vcpkg.exe install --triplet x64-windows --x-manifest-root %CD%
+      - name: Setup anew (or from cache) vcpkg (and does not build any package)
+        uses: lukka/run-vcpkg@v11
+        with:
+          manifestPath: '.' 
+          triplet: 'x64-windows'
+          cache: true
+          logCollection: true :contentReference[oaicite:5]{index=5}
 
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+        
+        
       - name: Build solution
-        run: msbuild CarEdger.sln /m /p:Configuration=Release /p:Platform=x64
+        run: msbuild MyApp.sln /m /p:Configuration=Release /p:Platform=x64 :contentReference[oaicite:6]{index=6
