@@ -18,8 +18,8 @@
  * @param title Title of the window.
  * @param nCmdShow Flag that controls how the window is to be shown.
  */
-Window::Window(HINSTANCE hInstance, const std::wstring& className, const std::wstring& title, int nCmdShow, DWORD style)
-    : hInstance(hInstance), szWindowClass(className), szTitle(title), nCmdShow(nCmdShow), dwStyle(style), hWnd(nullptr), menu(nullptr) {
+Window::Window(HINSTANCE hInstance, const std::wstring& className, const std::wstring& title, int nCmdShow, DWORD style, bool stop)
+    : hInstance(hInstance), szWindowClass(className), szTitle(title), nCmdShow(nCmdShow), dwStyle(style), hWnd(nullptr), menu(nullptr), stopApplicationOnClose(stop) {
 }
 
 Window::~Window() {
@@ -39,8 +39,22 @@ bool Window::Init() {
         if (!registerer->registerClass(szWindowClass, windowClass)) return false;              // Register the window class
     }
 
-    hWnd = CreateWindowW(szWindowClass.c_str(), szTitle.c_str(), dwStyle,
-        CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, this);                // Create the window
+    RECT rc = { 0, 0, width, height };
+    AdjustWindowRect(&rc, dwStyle, menuResource != -1);
+
+    int totalW = rc.right - rc.left;
+    int totalH = rc.bottom - rc.top;
+
+    hWnd = CreateWindowW(szWindowClass.c_str(), szTitle.c_str(), 
+        dwStyle,
+        (width == -1 ? CW_USEDEFAULT : 0),
+        (height == -1 ? CW_USEDEFAULT : 0),
+        (width == -1 ? CW_USEDEFAULT : totalW),
+        (height == -1 ? CW_USEDEFAULT : totalH),
+        nullptr, 
+        nullptr, 
+        hInstance, 
+        this);                // Create the window
     if (!hWnd) return false;
 
     SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));                   // Store the Window object in the window's user data
@@ -81,6 +95,15 @@ void Window::RegisterComponents() {
     }
 }
 
+void Window::HandleCommandEvent(WPARAM wParam, LPARAM lParam)
+{
+    HandleFileMenuPress(LOWORD(wParam));
+    auto it = components.find(LOWORD(wParam));
+    if (it != components.end()) {
+        it->second->HandleCommand(wParam, lParam);
+    }
+}
+
 WNDCLASSEXW Window::CreateWindowClass(HINSTANCE hInstance, std::wstring className)
 {
     WNDCLASSEXW wcex{ 0 };
@@ -113,12 +136,12 @@ LRESULT CALLBACK Window::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
         pWindow = reinterpret_cast<Window*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
     }
 
-    if (message == WM_DESTROY) {
+	if (!pWindow) return DefWindowProc(hWnd, message, wParam, lParam);
+
+    if (message == WM_DESTROY && pWindow->stopApplicationOnClose) {
         PostQuitMessage(0);
         return 0;
     }
-
-	if (!pWindow) return DefWindowProc(hWnd, message, wParam, lParam);
 
     if (message == WM_CREATE) {
         // pWindow->RegisterComponents();
@@ -167,7 +190,10 @@ LRESULT CALLBACK Window::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
     return pWindow->HandleMessage(hWnd, message, wParam, lParam);
 }
 
-void Window::Resize(int clientWidth, int clientHeight) const {
+void Window::Resize(int clientWidth, int clientHeight) {
+    width = clientWidth;
+    height = clientHeight;
+
     if (!hWnd) return;
 
     RECT rc = { 0, 0, clientWidth, clientHeight };

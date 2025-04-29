@@ -56,8 +56,10 @@ public:
     bool Init() override;
 
 protected:
+    void HandleFileMenuPress(UINT id) override;
     LRESULT HandleMessage(HWND eventHandle, UINT message, WPARAM wParam, LPARAM lParam);
-	std::shared_ptr<InputField> passwordField;
+
+    std::shared_ptr<InputField> passwordField;
     std::shared_ptr<InputField> usernameField;
     std::shared_ptr<Text> loginText;
     std::shared_ptr<Text> usernameLabel;

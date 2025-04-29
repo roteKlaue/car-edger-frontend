@@ -524,3 +524,4 @@ FodyWeavers.xsd
 
 # End of https://www.toptal.com/developers/gitignore/api/clion+all,c++,visualstudio
 .qodo
+vcpkg_installed

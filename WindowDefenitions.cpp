@@ -80,7 +80,16 @@ LRESULT TestWindow2::HandleMessage(HWND eventHandle, UINT message, WPARAM wParam
 
 void TestWindow2::HandleFileMenuPress(UINT id)
 {
-	
+	switch (id) {
+	case ID_FILE_EXIT:
+		PostMessage(GetWindowHandle(), WM_CLOSE, 0, 0);
+		break;
+	case ID_HELP_ABOUT:
+		DialogBox(GetModuleHandle(nullptr), MAKEINTRESOURCE(IDD_ABOUTBOX), GetWindowHandle(), About);
+		break;
+	default:
+		break;
+	}
 }
 
 LoginWindow::LoginWindow(HINSTANCE hInstance, int nCmdShow)
@@ -89,7 +98,7 @@ LoginWindow::LoginWindow(HINSTANCE hInstance, int nCmdShow)
         WS_CAPTION |
         WS_SYSMENU |
         WS_MINIMIZEBOX) {
-    SetMenuResource(IDC_MAIN_WINDOW_MENU);
+    SetMenuResource(IDC_LOGIN_MENU);
     HFONT largeFont = Util::CreatePointFont(16);
     HFONT largeXXLFont = Util::CreatePointFont(22);
 
@@ -97,12 +106,14 @@ LoginWindow::LoginWindow(HINSTANCE hInstance, int nCmdShow)
     usernameField->SetPlaceholder(L"Username");
     usernameField->SetPosition(20, 100);
     usernameField->SetFont(largeFont);
+    usernameField->SetSize(220, 40);
 
     passwordField = std::make_shared<InputField>();
     passwordField->SetPlaceholder(L"Password");
     passwordField->SetType(InputFieldType::PASSWORD);
     passwordField->SetPosition(20, 200);
     passwordField->SetFont(largeFont);
+    passwordField->SetSize(220, 40);
 
     loginText = std::make_shared<Text>();
     loginText->SetText(L"Login to Car Edger");
@@ -112,7 +123,7 @@ LoginWindow::LoginWindow(HINSTANCE hInstance, int nCmdShow)
     usernameLabel = std::make_shared<Text>();
     usernameLabel->SetPosition(20, 80);
     usernameLabel->SetText(L"Username:");
-
+    
     passwordLabel = std::make_shared<Text>();
     passwordLabel->SetPosition(20, 180);
     passwordLabel->SetText(L"Password:");
@@ -140,9 +151,21 @@ bool LoginWindow::Init()
 {
 	if (!Window::Init()) return false;
     Resize(260, 350);
-    passwordField->SetSize(220, 40);
-    usernameField->SetSize(220, 40);
     return true;
+}
+
+void LoginWindow::HandleFileMenuPress(UINT id)
+{
+    switch (id) {
+    case ID_LOGIN_FILE_EXIT:
+        PostMessage(GetWindowHandle(), WM_CLOSE, 0, 0);
+        break;
+    case ID_LOGIN_HELP_ABOUT:
+        DialogBox(GetModuleHandle(nullptr), MAKEINTRESOURCE(IDD_ABOUTBOX), GetWindowHandle(), About);
+        break;
+    default:
+        break;
+    }
 }
 
 LRESULT LoginWindow::HandleMessage(HWND eventHandle, UINT message, WPARAM wParam, LPARAM lParam)
