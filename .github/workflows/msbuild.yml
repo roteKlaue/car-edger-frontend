@@ -1,29 +1,28 @@
-name: Build with MSBuild and vcpkg
+name: CI
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   build:
     runs-on: windows-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Set up MSBuild
-        uses: microsoft/setup-msbuild@v1.0.2
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
 
-      - name: Install vcpkg
+      - name: Bootstrap vcpkg
+        run: .\vcpkg\bootstrap-vcpkg.bat
+
+      - name: Install vcpkg dependencies
         run: |
-          git clone https://github.com/microsoft/vcpkg.git
-          ./vcpkg/bootstrap-vcpkg.bat
+          .\vcpkg\vcpkg.exe install --triplet x64-windows --x-manifest-root %CD%
 
-      - name: Install dependencies
-        run: |
-          ./vcpkg/vcpkg install fmt
-
-      - name: Build with MSBuild
-        run: |
-          msbuild CarEdger.sln /p:Configuration=Release
+      - name: Build solution
+        run: msbuild CarEdger.sln /m /p:Configuration=Release /p:Platform=x64
