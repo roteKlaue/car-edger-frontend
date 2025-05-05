@@ -25,7 +25,7 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 }
 
 MainWindow::MainWindow(HINSTANCE hInstance, int nCmdShow)
-    : Window(hInstance, L"DefaultWindowClass", L"Car Edger", nCmdShow) {
+    : Window(hInstance, L"DefaultWindowClass", L"Car Edger", nCmdShow, WS_OVERLAPPEDWINDOW, true) {
     SetMenuResource(IDC_CAREDGER);
 }
 
@@ -144,18 +144,28 @@ LoginWindow::LoginWindow(HINSTANCE hInstance, int nCmdShow)
         std::wstring username = usernameField->GetText();
         std::wstring password = passwordField->GetText();
 
-        std::wcout << L"[DEBUG] Username: " << username << std::endl;
-        std::wcout << L"[DEBUG] Password: " << password << std::endl;
-
         std::string usernameStr = Util::to_utf8(username);
         std::string passwordStr = Util::to_utf8(password);
 
 		json jsonObject = {
 			{"username", usernameStr },
 			{"password", passwordStr }
-        };
+        }; 
 
         std::cout << "[DEBUG] Resulting JSON: " << jsonObject.dump(2) << std::endl;
+        json res = json::parse(Window::client->post(L"localhost", L"/car-edgers/auth/login", jsonObject.dump(1), "application/json", 8080));
+
+        if (res["success"]) {
+            SetStopApplicationOnClose(false);
+            PostMessage(GetWindowHandle(), WM_CLOSE, 0, 0);
+
+            MainWindow window(GetInstance(), SW_SHOW);
+
+            window.Init();
+            window.RunMessageLoop();
+        }
+
+        std::cout << "[DEBUG] Login response: " << res.dump(2) << std::endl;
     });
 
     AddComponent(loginText);

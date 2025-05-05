@@ -57,7 +57,7 @@ void InputField::Create()
 
 	std::cout << "Create called" << std::endl;
 
-	DWORD style = WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL;
+	DWORD style = WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP;
 	if (type == InputFieldType::PASSWORD) {
 		style |= ES_PASSWORD;
 	}

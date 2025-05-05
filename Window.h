@@ -11,6 +11,7 @@
 #include "Menu.h"
 #include "Component.h"
 #include <memory>
+#include "HttpClient.h"
 
 /**
  * @class Window
@@ -19,6 +20,7 @@
  */
 class Window {
 public:
+	static const HttpClient* client; /**< Static HTTP client instance for network operations. */
     /**
      * @brief Constructs a Window object.
      * @param hInstance Handle to the application instance.
@@ -39,6 +41,8 @@ public:
     void RunMessageLoop() const;
     HWND GetWindowHandle() const { return hWnd; }
     void Resize(int clientWidth, int clientHeight);
+	void SetStopApplicationOnClose(bool stop) { stopApplicationOnClose = stop; }
+	HINSTANCE GetInstance() const { return hInstance; }
     // RegisterMenu(Menu* men) { menu = men; }
     void RegisterComponents();
     void AddComponent(std::shared_ptr<Component> component) { components[component->GetID()] = component; }

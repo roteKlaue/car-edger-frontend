@@ -10,6 +10,8 @@
 #include "ClassRegisterer.h"
 #include <iostream>
 
+const HttpClient* Window::client = new HttpClient();
+
 /**
  * @brief Constructor for the Window class. Initializes the window class name, title, and command show flag.
  *
