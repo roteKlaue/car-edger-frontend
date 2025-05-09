@@ -10,46 +10,6 @@
 #include "Util.h"
 #include "HttpClient.h"
 
-/*
-class MainFrame : public Frame {
-public:
-    MainFrame(HINSTANCE hInstance, int nCmdShow);
-protected:
-    LRESULT HandleMessage(HWND eventHandle, UINT message, WPARAM wParam, LPARAM lParam);
-};
-
-class TestFrame : public Frame {
-public:
-    TestFrame(HINSTANCE hInstance, int nCmdShow)
-        : Frame(hInstance, L"TestFrameClass", L"Car Edger Test", nCmdShow) {
-        /* Menu* men = new Menu();
-        Menu submen(MenuType::PopupMenu);
-        Option open(L"&Open");
-        Option exit(L"&Exit");
-
-        submen.SetLabel(L"File");
-        submen.AddOption(&open);
-        submen.AddOption(&exit);
-
-        men->AddSubMenu(&submen);
-        // RegisterMenu(men);
-    }
-
-protected:
-    LRESULT HandleMessage(HWND eventHandle, UINT message, WPARAM wParam, LPARAM lParam);
-};
-
-class TestFrame2 : public Frame {
-public:
-    TestFrame2(HINSTANCE hInstance, int nCmdShow);
-
-protected:
-    LRESULT HandleMessage(HWND eventHandle, UINT message, WPARAM wParam, LPARAM lParam);
-	void HandleFileMenuPress(UINT id) override;
-    std::shared_ptr<Text> text;
-    std::shared_ptr<InputField> inputField2;
-};*/
-
 class MainFrame : public Frame {
 
 public:
@@ -69,7 +29,6 @@ public:
 
 class LoginFrame : public Frame {
 private:
-	static const HttpClient* httpClient;
 
 public:
     LoginFrame();
@@ -78,10 +37,6 @@ public:
 
     std::string GetUniqueIdentifier() const override {
         return "LoginFrame";
-    }
-
-    void Unload(Window* win) override {
-        Frame::Unload(win);
     }
 
 protected:
@@ -93,4 +48,47 @@ protected:
 	std::shared_ptr<Button> loginButton;
 
     void OnLoginClick();
+};
+
+class RegisterFrame : public Frame {
+private:
+
+public:
+    RegisterFrame();
+
+    void WakeUp(Window* win, const json& options) override;
+
+    std::string GetUniqueIdentifier() const override {
+        return "RegisterFrame";
+    }
+
+protected:
+    std::shared_ptr<InputField> passwordField;
+    std::shared_ptr<InputField> usernameField;
+    std::shared_ptr<Text> registerText;
+    std::shared_ptr<Text> usernameLabel;
+    std::shared_ptr<Text> passwordLabel;
+    std::shared_ptr<Button> registerButton;
+
+    void OnRegisterClick();
+};
+
+class LoaderFrame : public Frame {
+public:
+    std::string GetUniqueIdentifier() const override { return "LoaderFrame"; }
+
+    void WakeUp(Window* win, const json& options) override;
+    void Unload(Window* win) override;
+    LRESULT HandleMessage(Window* win, UINT msg, WPARAM wp, LPARAM lp) override;
+    void OnPaint(HDC hdc) override;
+
+private:
+    void UpdateAnimation();
+    void DrawLoader(HDC hdc, RECT rect) const;
+
+    float rotation = 0.0f;
+    float fillPercent = 0.0f;
+    int frameCounter = 0;
+    static constexpr int FPS = 45;
+    static constexpr int TIMER_ID = 1001;
 };

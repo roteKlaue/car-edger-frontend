@@ -4,6 +4,8 @@
 #include "Resource.h"
 #include "Frame.h"
 #include <iostream>
+#include "SubWindow.h"
+#include "FrameDefenitions.h"
 
 const std::wstring Window::GENERIC_CLASS_NAME = L"GenericWndClass";
 bool               Window::classRegistered    = false;
@@ -14,10 +16,15 @@ Window::Window(HINSTANCE instance, int nCmdShow)
 
 Window::~Window()
 {
-    if (windowHandle) {
-        DestroyWindow(windowHandle);
-        windowHandle = nullptr;
+    Cleanup();
+
+    for (auto& subWindow : subWindows) {
+        if (subWindow) {
+            subWindow->Cleanup();
+        }
     }
+
+    subWindows.clear();
 }
 
 void Window::RegisterWindowClass() const {
@@ -45,6 +52,14 @@ void Window::Update() const
     DrawMenuBar(windowHandle);
 }
 
+void Window::Cleanup()
+{
+    if (windowHandle) {
+        DestroyWindow(windowHandle);
+        windowHandle = nullptr;
+    }
+}
+
 bool Window::Init() {
     RegisterWindowClass();
 
@@ -67,7 +82,6 @@ bool Window::Init() {
 
 void Window::RunMessageLoop() const
 {
-    /*
     HACCEL hAccelTable = LoadAccelerators(instance, MAKEINTRESOURCE(IDC_CAREDGER));
     MSG msg;
 
@@ -77,30 +91,10 @@ void Window::RunMessageLoop() const
         TranslateMessage(&msg);
         DispatchMessage(&msg);
     }
-    */
-
-    HACCEL hAccelTable = LoadAccelerators(instance, MAKEINTRESOURCE(IDC_CAREDGER));
-    MSG msg;
-    std::wcout << L"[LOOP] Entering message loop" << std::endl;
-
-    while (true) {
-        BOOL got = GetMessage(&msg, nullptr, 0, 0);
-        std::wcout << L"[LOOP] GetMessage returned " << got << std::endl;
-        if (got == 0) break;
-        if (got == -1) {
-            std::wcout << L"[LOOP] GetMessage error: " << GetLastError() << std::endl;
-            break;
-        }
-
-        if (TranslateAccelerator(msg.hwnd, hAccelTable, &msg)) continue;
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
-    }
-
-    std::wcout << L"[LOOP] Exited message loop" << std::endl;
 }
 
 void Window::RegisterSubWindow(std::shared_ptr<SubWindow> subWindow) {
+	subWindow->SetParent(this);
     subWindows.push_back(std::move(subWindow));
 }
 
@@ -135,6 +129,55 @@ LRESULT CALLBACK Window::StaticWndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp
     return DefWindowProc(hWnd, msg, wp, lp);
 }
 
+void Window::LoadInBackground(
+    const std::wstring& host,
+    const std::wstring& path,
+    const std::string& body,
+    const std::string& contentType,
+    int port,
+    Callback onSuccess,
+    ErrorCallback onError,
+    bool usePost
+) {
+    auto win = this;
+    auto loaderFrame = std::make_shared<LoaderFrame>();
+    win->LoadFrame(loaderFrame, {});
+
+    RunOnBackgroundThread([=]() {
+        try {
+            std::string response;
+
+            if (usePost) {
+                response = httpClient->post(host, path, body, contentType, port);
+            }
+            else {
+                response = httpClient->get(host, path, port);
+            }
+
+            auto res = json::parse(response);
+            win->PostToUIThread([win, res, onSuccess]() {
+                onSuccess(res);
+            });
+        }
+        catch (const std::exception& e) {
+            std::cerr << "[ERROR] Exception in LoadInBackground: " << e.what() << std::endl;
+            if (onError) {
+                win->PostToUIThread([e, onError]() {
+                    onError(e.what());
+                });
+            }
+        }
+        catch (...) {
+            std::cerr << "[ERROR] Unknown exception in LoadInBackground" << std::endl;
+            if (onError) {
+                win->PostToUIThread([onError]() {
+                    onError("Unknown error");
+                });
+            }
+        }
+    });
+}
+
 LRESULT Window::HandleMessage(UINT msg, WPARAM wp, LPARAM lp) {
     if (msg == WM_PAINT) {
         PAINTSTRUCT ps;
@@ -160,12 +203,6 @@ LRESULT Window::HandleMessage(UINT msg, WPARAM wp, LPARAM lp) {
     default:
         return DefWindowProc(windowHandle, msg, wp, lp);
     }
-}
-
-void Window::SetTitle(const std::wstring& t) {
-    title = t;
-    if (!initialized || !windowHandle) return;
-    SetWindowTextW(windowHandle, title.c_str());
 }
 
 void Window::SetSize(int w, int h) {

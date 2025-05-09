@@ -66,6 +66,12 @@
     <ClInclude Include="Window.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="MainWindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SubWindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CarEdger.cpp">
@@ -108,6 +114,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Window.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MainWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SubWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

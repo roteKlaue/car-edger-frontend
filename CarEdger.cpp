@@ -7,8 +7,8 @@
 #include "framework.h"
 #include "CarEdger.h"
 #include <iostream>
-#include "Window.h"
 #include "FrameDefenitions.h"
+#include "MainWindow.h"
 
 static void AttachConsoleToStdout() {
     AllocConsole(); // Allocate a new console window
@@ -50,7 +50,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, // handle to the current instanc
 #endif
 
     // Create a Window object
-    Window appWindow(hInstance, nCmdShow);
+    MainWindow appWindow(hInstance, nCmdShow);
     if (!appWindow.Init()) {
         PrintLastError();
         std::wcout << L"[DEBUG] Window initialization failed." << std::endl;
