@@ -12,6 +12,7 @@ public:
     Button& operator=(const Button&) = delete;
 
     void SetText(const std::wstring& text) override;
+    void Destroy() override;
     std::wstring GetText() const override { return text; };
 
     void SetOnClick(std::function<void()> callback);

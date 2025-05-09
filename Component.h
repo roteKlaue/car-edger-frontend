@@ -1,9 +1,10 @@
 #pragma once
 
 #include <windows.h>
+#include "Window.h"
 #include <string>
 
-class Window;
+class Frame;
 
 class Component
 {
@@ -11,6 +12,7 @@ public:
 	Component();
 	virtual ~Component() = default;
 	virtual void Create() = 0;
+	virtual void Destroy() = 0;
 	virtual void Show(int cmdShow) const;
 	virtual void Hide() const;
 	virtual void Enable() const;
@@ -21,7 +23,7 @@ public:
 	virtual void SetFont(HFONT font);
 	virtual void SetVisible(bool visible);
 	virtual void SetFocus() const;
-	virtual void SetParent(Window* window);
+	virtual void SetParent(Frame* window);
 	virtual int GetID() const { return id; };
 	virtual HWND GetHandle() const { return handle; };
 
@@ -33,7 +35,7 @@ protected:
 	UINT id;
 	HWND handle;
 	HFONT hFont;
-	Window* window;
+	Frame* window;
 
 	int width = 100;
 	int height = 20;

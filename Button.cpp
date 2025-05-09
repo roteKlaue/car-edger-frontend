@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "Button.h"
-#include "Window.h"
+#include "Frame.h"
 
 Button::Button() : Component(), text(L"Button") {}
 
@@ -10,6 +10,15 @@ void Button::SetText(const std::wstring& text)
     if (initialized && handle) {
         SetWindowText(handle, text.c_str());
     }
+}
+
+void Button::Destroy()
+{
+    if (handle) {
+		DestroyWindow(handle);
+		handle = nullptr;
+	}
+	initialized = false;
 }
 
 void Button::SetOnClick(std::function<void()> callback)

@@ -1,7 +1,8 @@
 #include "pch.h"
-#include "WindowDefenitions.h"
+#include "FrameDefenitions.h"
 #include "Text.h"
 #include <nlohmann/json.hpp>
+#include "Window.h"
 
 using json = nlohmann::json;
 
@@ -24,8 +25,11 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
     return (INT_PTR)FALSE;
 }
 
+const HttpClient* LoginFrame::httpClient = new HttpClient();
+
+/*
 MainWindow::MainWindow(HINSTANCE hInstance, int nCmdShow)
-    : Window(hInstance, L"DefaultWindowClass", L"Car Edger", nCmdShow, WS_OVERLAPPEDWINDOW, true) {
+    : Frame(hInstance, L"DefaultWindowClass", L"Car Edger", nCmdShow, WS_OVERLAPPEDWINDOW, true) {
     SetMenuResource(IDC_CAREDGER);
 }
 
@@ -59,7 +63,7 @@ LRESULT TestWindow::HandleMessage(HWND eventHandle, UINT message, WPARAM wParam,
 }
 
 TestWindow2::TestWindow2(HINSTANCE hInstance, int nCmdShow) 
-    : Window(hInstance, L"TestWindowClass", L"Car Edger Test", nCmdShow) {
+    : Frame(hInstance, L"TestWindowClass", L"Car Edger Test", nCmdShow) {
     SetMenuResource(IDC_MAIN_WINDOW_MENU);
 
     inputField2 = std::make_shared<InputField>();
@@ -93,19 +97,11 @@ void TestWindow2::HandleFileMenuPress(UINT id)
 	default:
 		break;
 	}
-}
+} */
 
-LoginWindow::LoginWindow(HINSTANCE hInstance, int nCmdShow)
-    : Window(hInstance, L"LoginWindowClass", L"Car Edger Login", nCmdShow,
-        WS_OVERLAPPED |
-        WS_CAPTION |
-        WS_SYSMENU |
-        WS_MINIMIZEBOX,
-        true) {
-    SetMenuResource(IDC_LOGIN_MENU);
-    HFONT largeFont = Util::CreatePointFont(16);
-    HFONT largeXXLFont = Util::CreatePointFont(22);
-    Resize(260, 350);
+LoginFrame::LoginFrame() {
+    auto largeFont = Util::CreatePointFont(16);
+    auto largeXXLFont = Util::CreatePointFont(22);
 
     usernameField = std::make_shared<InputField>();
     usernameField->SetPlaceholder(L"Username");
@@ -128,7 +124,7 @@ LoginWindow::LoginWindow(HINSTANCE hInstance, int nCmdShow)
     usernameLabel = std::make_shared<Text>();
     usernameLabel->SetPosition(20, 80);
     usernameLabel->SetText(L"Username:");
-    
+
     passwordLabel = std::make_shared<Text>();
     passwordLabel->SetPosition(20, 180);
     passwordLabel->SetText(L"Password:");
@@ -138,59 +134,64 @@ LoginWindow::LoginWindow(HINSTANCE hInstance, int nCmdShow)
     loginButton->SetPosition(50, 260);
     loginButton->SetSize(150, 40);
     loginButton->SetFont(largeFont);
-    loginButton->SetOnClick([this]() {
-        std::wcout << L"[DEBUG] Login button clicked." << std::endl;
+    loginButton->SetOnClick([this]() { OnLoginClick(); });
 
-        std::wstring username = usernameField->GetText();
-        std::wstring password = passwordField->GetText();
-
-        std::string usernameStr = Util::to_utf8(username);
-        std::string passwordStr = Util::to_utf8(password);
-
-		json jsonObject = {
-			{"username", usernameStr },
-			{"password", passwordStr }
-        }; 
-
-        std::cout << "[DEBUG] Resulting JSON: " << jsonObject.dump(2) << std::endl;
-        json res = json::parse(Window::client->post(L"localhost", L"/car-edgers/auth/login", jsonObject.dump(1), "application/json", 8080));
-
-        if (res["success"]) {
-            SetStopApplicationOnClose(false);
-            PostMessage(GetWindowHandle(), WM_CLOSE, 0, 0);
-
-            MainWindow window(GetInstance(), SW_SHOW);
-
-            window.Init();
-            window.RunMessageLoop();
-        }
-
-        std::cout << "[DEBUG] Login response: " << res.dump(2) << std::endl;
-    });
-
-    AddComponent(loginText);
-    AddComponent(usernameLabel);
-    AddComponent(passwordLabel);
-    AddComponent(passwordField);
-    AddComponent(usernameField);
-    AddComponent(loginButton);
+    RegisterComponent(loginText);
+    RegisterComponent(usernameLabel);
+    RegisterComponent(passwordLabel);
+    RegisterComponent(passwordField);
+    RegisterComponent(usernameField);
+    RegisterComponent(loginButton);
 }
 
-void LoginWindow::HandleFileMenuPress(UINT id)
+void LoginFrame::OnLoginClick()
 {
-    switch (id) {
-    case ID_LOGIN_FILE_EXIT:
-        PostMessage(GetWindowHandle(), WM_CLOSE, 0, 0);
-        break;
-    case ID_LOGIN_HELP_ABOUT:
-        DialogBox(GetModuleHandle(nullptr), MAKEINTRESOURCE(IDD_ABOUTBOX), GetWindowHandle(), About);
-        break;
-    default:
-        break;
+    auto u = usernameField->GetText();
+    auto p = passwordField->GetText();
+    json j = {
+        {"username", Util::to_utf8(u)},
+        {"password", Util::to_utf8(p)}
+    };
+
+    try {
+        std::cout << "[DEBUG] Requesting with body: " << j.dump() << std::endl;
+        auto response = LoginFrame::httpClient->post(L"localhost", L"/car-edgers/auth/login", j.dump(), "application/json", 8080);
+        auto res = json::parse(response);   
+        std::cout << "[DEBUG] Response body: " << res.dump() << std::endl;
+
+        if(res.value("success", true)) {
+            std::cout << "[DEBUG] Response body: " << res.dump() << std::endl;
+            auto main = std::make_shared<MainFrame>();
+            win->LoadFrame(main, res);
+        }
+    }
+    catch (const std::exception& e) {
+        std::cout << "[ERROR] Exception: " << e.what() << '\n';
+    }
+    catch (...) {
+        std::cout << "[ERROR] Unknown exception occurred.\n";
     }
 }
 
-LRESULT LoginWindow::HandleMessage(HWND eventHandle, UINT message, WPARAM wParam, LPARAM lParam)
+void LoginFrame::WakeUp(Window* win, const json& options)
 {
-    return DefWindowProc(eventHandle, message, wParam, lParam);
+    Frame::WakeUp(win, options);
+
+    win->SetTitle(L"Car Edger - Login");
+    win->SetStyle(WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX);
+    win->SetSize(260, 350);
+    win->SetMenuResource(IDC_LOGIN_MENU);    
+}
+
+MainFrame::MainFrame() : Frame() {}
+
+void MainFrame::WakeUp(Window* win, const json& options)
+{
+    std::cout << "[DEBUG] Options body: " << options.dump() << std::endl;
+    Frame::WakeUp(win, options);
+    // Configure window appearance when frame loads
+    win->SetTitle(L"Car Edger - Mainpage");
+    win->SetStyle(WS_OVERLAPPEDWINDOW);
+    // win->SetSize(-1, -1);
+    std::cout << "[DEBUG] Finished resetting Frame." << std::endl;
 }

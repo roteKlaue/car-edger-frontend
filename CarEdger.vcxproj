@@ -130,6 +130,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -153,8 +154,9 @@
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Text.h" />
     <ClInclude Include="Util.h" />
+    <ClInclude Include="Frame.h" />
     <ClInclude Include="Window.h" />
-    <ClInclude Include="WindowDefenitions.h" />
+    <ClInclude Include="FrameDefenitions.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Button.cpp" />
@@ -173,8 +175,9 @@
     </ClCompile>
     <ClCompile Include="Text.cpp" />
     <ClCompile Include="Util.cpp" />
+    <ClCompile Include="Frame.cpp" />
     <ClCompile Include="Window.cpp" />
-    <ClCompile Include="WindowDefenitions.cpp" />
+    <ClCompile Include="FrameDefenitions.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="CarEdger.rc" />

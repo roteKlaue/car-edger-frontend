@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "InputField.h"
 #include "Util.h"
-#include "Window.h"
+#include "Frame.h"
 #include <iostream>
 #include <commctrl.h>
 
@@ -11,6 +11,15 @@ InputField::InputField() : Component(),
 	text(empty_str),
 	placeholder(empty_str),
 	type(InputFieldType::TEXT){ }
+
+void InputField::Destroy()
+{
+	if (handle) {
+		DestroyWindow(handle);
+		handle = nullptr;
+	}
+	initialized = false;
+}
 
 void InputField::SetText(const std::wstring& text)
 {
@@ -57,7 +66,7 @@ void InputField::Create()
 
 	std::cout << "Create called" << std::endl;
 
-	DWORD style = WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP;
+	DWORD style = WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | WS_TABSTOP;
 	if (type == InputFieldType::PASSWORD) {
 		style |= ES_PASSWORD;
 	}

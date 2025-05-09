@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Component.h"
 #include "Util.h"
-#include "Window.h"
+#include "Frame.h"
 
 Component::Component() : id(Util::GenerateId()),
 	handle(nullptr),
@@ -35,7 +35,7 @@ void Component::SetVisible(bool visible)
 	ShowWindow(handle, visible ? SW_SHOW : SW_HIDE);
 }
 
-void Component::SetParent(Window* parent)
+void Component::SetParent(Frame* parent)
 {
 	if (!parent) return;
 	window = parent;

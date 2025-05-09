@@ -4,12 +4,11 @@
 //
 
 #include "pch.h"
-#include "ClassRegisterer.h"
 #include "framework.h"
 #include "CarEdger.h"
-#include "WindowDefenitions.h"
 #include <iostream>
-#include "HttpClient.h"
+#include "Window.h"
+#include "FrameDefenitions.h"
 
 static void AttachConsoleToStdout() {
     AllocConsole(); // Allocate a new console window
@@ -51,26 +50,21 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, // handle to the current instanc
 #endif
 
     // Create a Window object
-    LoginWindow window(hInstance, nCmdShow);
-
-    // Initialize the window
-    if (!window.Init()) {
+    Window appWindow(hInstance, nCmdShow);
+    if (!appWindow.Init()) {
         PrintLastError();
         std::wcout << L"[DEBUG] Window initialization failed." << std::endl;
         MessageBoxW(nullptr, L"Window initialization failed!", L"Error", MB_OK | MB_ICONERROR);
-        return 0;
+        return -1;
     }
 
     std::wcout << L"[DEBUG] Window initialized successfully." << std::endl;
-    HWND hndl = window.GetWindowHandle();
-    HMENU hMenu = CreateMenu();
+    auto loginFrame = std::make_shared<LoginFrame>();
+    appWindow.LoadFrame(loginFrame);
+    appWindow.Show();
 
-    // Run the message loop
-    window.RunMessageLoop();
-    std::wcout << L"[DEBUG] Exiting message loop, unregistering classes." << std::endl;
-
-    ClassRegisterer::GetInstance()->unregisterClasses();
-    std::wcout << L"[DEBUG] Classes unregistered, application exiting." << std::endl;
+    appWindow.RunMessageLoop();
+    std::wcout << L"[DEBUG] Exiting message loop." << std::endl;
 
     return 0;
 }

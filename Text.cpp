@@ -1,12 +1,12 @@
 #include "pch.h"
 #include "Text.h"
-#include "Window.h"
+#include "Frame.h"
 #include <iostream>
 
 void Text::SetText(const std::wstring& text)
 {
 	this->text = text;
-	Window* window = this->window;
+	Frame* window = this->window;
 
 	if (!window || !window->GetWindowHandle()) return;
 
@@ -15,3 +15,4 @@ void Text::SetText(const std::wstring& text)
 }
 
 void Text::Create() {}
+void Text::Destroy() {}

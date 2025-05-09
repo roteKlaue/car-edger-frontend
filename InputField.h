@@ -26,6 +26,7 @@ public:
 	InputField();
 	InputField(const InputField&) = delete;
 	InputField& operator=(const InputField&) = delete;
+	void Destroy() override;
 	void SetText(const std::wstring& text) override;
 	void SetType(const InputFieldType type) { this->type = type; };
 	void SetPlaceholder(const std::wstring text);

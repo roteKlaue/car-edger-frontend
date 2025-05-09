@@ -10,6 +10,7 @@ public:
 	int GetX() { return x; };
 	int GetY() { return y; };
 	void Create() override;
+	void Destroy() override;
 	HFONT GetFont() { return hFont; };
 
 	void SetText(const std::wstring& text) override;
