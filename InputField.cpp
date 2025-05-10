@@ -64,8 +64,6 @@ void InputField::Create()
 {
 	if (initialized) return;
 
-	std::cout << "Create called" << std::endl;
-
 	DWORD style = WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | WS_TABSTOP;
 	if (type == InputFieldType::PASSWORD) {
 		style |= ES_PASSWORD;
@@ -73,10 +71,6 @@ void InputField::Create()
 	else if (type == InputFieldType::NUMBER) {
 		style |= ES_NUMBER;
 	}
-
-	std::cout << "Style: " << style << std::endl;
-	std::cout << "X,Y: " << x << "," << y << std::endl;
-	std::cout << "Width,Height: " << width << "," << height << std::endl;
 
 	handle = CreateWindowEx(
 		WS_EX_CLIENTEDGE,

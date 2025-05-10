@@ -6,6 +6,13 @@
 
 class Frame;
 
+/**
+ * @brief Abstract base class representing a GUI component.
+ *
+ * Provides common functionality and interface for all GUI components
+ * (e.g., buttons, text fields). Derived classes must implement `Create`,
+ * `Destroy`, `SetText`, and `GetText`.
+ */
 class Component
 {
 public:
@@ -32,15 +39,15 @@ public:
 	virtual void HandleCommand(WPARAM wParam, LPARAM lParam) {};
 
 protected:
-	UINT id;
-	HWND handle;
-	HFONT hFont;
-	Frame* window;
+	UINT id;					///< Unique identifier for the component.
+	HWND handle;				///< Native window handle.
+	HFONT hFont;				///< Handle to the font used by the component.
+	Frame* window;				///< Pointer to the parent frame.
 
-	int width = 100;
-	int height = 20;
-	int x = 0;
-	int y = 0;
+	int width = 100;			///< Width of the component.
+	int height = 20;			///< Height of the component.
+	int x = 0;					///< X-coordinate of the component.
+	int y = 0;					///< Y-coordinate of the component.
 
-	bool initialized = false;
+	bool initialized = false;	///< True if the component has been created.
 };

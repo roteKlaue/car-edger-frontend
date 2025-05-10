@@ -26,6 +26,14 @@ static INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
     return (INT_PTR)FALSE;
 }
 
+static void Close(Window* win) {
+	SendMessage(win->GetWindowHandle(), WM_CLOSE, 0, 0);
+}
+
+static void OpenAbout(Window* win) {
+	DialogBox(GetModuleHandle(nullptr), MAKEINTRESOURCE(IDD_ABOUTBOX), win->GetWindowHandle(), About);
+}
+
 LoginFrame::LoginFrame() {
     auto largeFont = Util::CreatePointFont(16);
     auto largeXXLFont = Util::CreatePointFont(22);
@@ -97,8 +105,11 @@ void LoginFrame::OnLoginClick()
                 win->LoadFrame(retry, res);
             }
         },
-        [](const std::string& err) {
+        [win](const std::string& err) {
+            std::cout << "[ERROR] Login Error: " << err << std::endl;
             MessageBoxA(nullptr, err.c_str(), "Login Error", MB_ICONERROR);
+            auto retry = std::make_shared<LoginFrame>();
+            win->LoadFrame(retry);
         }
     );
 }
@@ -112,6 +123,12 @@ void LoginFrame::WakeUp(Window* win, const json& options)
     win->SetSize(260, 350);
     win->SetMenuResource(IDC_LOGIN_MENU);
 
+    win->RegisterMenuButton(ID_LOGIN_FILE_EXIT, Close);
+	win->RegisterMenuButton(ID_LOGIN_HELP_ABOUT, OpenAbout);
+	win->RegisterMenuButton(ID_LOGIN_FILE_REGISTER, [](Window* win) {
+		auto reg = std::make_shared<RegisterFrame>();
+		win->LoadFrame(reg, {});
+	});
 	usernameField->SetText(L"");
 	passwordField->SetText(L"");
 	usernameField->SetFocus();
@@ -138,14 +155,14 @@ RegisterFrame::RegisterFrame()
     usernameField->SetPlaceholder(L"Username");
     usernameField->SetPosition(20, 100);
     usernameField->SetFont(largeFont);
-    usernameField->SetSize(220, 40);
+    usernameField->SetSize(250, 40);
 
     passwordField = std::make_shared<InputField>();
     passwordField->SetPlaceholder(L"Password");
     passwordField->SetType(InputFieldType::PASSWORD);
     passwordField->SetPosition(20, 200);
     passwordField->SetFont(largeFont);
-    passwordField->SetSize(220, 40);
+    passwordField->SetSize(250, 40);
 
     registerText = std::make_shared<Text>();
     registerText->SetText(L"Register to Car Edger");
@@ -163,7 +180,7 @@ RegisterFrame::RegisterFrame()
     registerButton = std::make_shared<Button>();
     registerButton->SetText(L"Register");
     registerButton->SetPosition(50, 260);
-    registerButton->SetSize(150, 40);
+    registerButton->SetSize(180, 40);
     registerButton->SetFont(largeFont);
     registerButton->SetOnClick([this]() { OnRegisterClick(); });
 
@@ -181,8 +198,15 @@ void RegisterFrame::WakeUp(Window* win, const json& options)
 
     win->SetTitle(L"Car Edger - Register");
     win->SetStyle(WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX);
-    win->SetSize(260, 350);
+    win->SetSize(290, 350);
     win->SetMenuResource(IDC_REGISTER_MENU);
+
+    win->RegisterMenuButton(ID_REGISTER_EXIT, Close);
+    win->RegisterMenuButton(ID_REGISTER_HELP, OpenAbout);
+    win->RegisterMenuButton(ID_REGISTER_LOGIN, [](Window *win) {
+        auto log = std::make_shared<LoginFrame>();
+        win->LoadFrame(log, {});
+    });
 
     usernameField->SetText(L"");
     passwordField->SetText(L"");
@@ -191,7 +215,38 @@ void RegisterFrame::WakeUp(Window* win, const json& options)
 
 void RegisterFrame::OnRegisterClick()
 {
-    
+    auto u = usernameField->GetText();
+    auto p = passwordField->GetText();
+    json j = {
+        {"username", Util::to_utf8(u)},
+        {"password", Util::to_utf8(p)}
+    };
+
+    auto win = this->win;
+
+    win->LoadInBackground(
+        L"localhost",
+        L"/car-edgers/auth/register",
+        j.dump(),
+        "application/json",
+        8080,
+        [win](const json& res) {
+            if (res.value("success", false)) {
+                auto main = std::make_shared<LoginFrame>();
+                win->LoadFrame(main, res);
+            }
+            else {
+                auto retry = std::make_shared<RegisterFrame>();
+                win->LoadFrame(retry, res);
+            }
+        },
+        [win](const std::string& err) {
+            std::cout << "[ERROR] Registering Error: " << err << std::endl;
+            MessageBoxA(nullptr, err.c_str(), "Registering Error", MB_ICONERROR);
+            auto retry = std::make_shared<RegisterFrame>();
+            win->LoadFrame(retry);
+        }
+    );
 }
 
 void LoaderFrame::WakeUp(Window* win, const json& options) {

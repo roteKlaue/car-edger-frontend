@@ -17,14 +17,6 @@ Window::Window(HINSTANCE instance, int nCmdShow)
 Window::~Window()
 {
     Cleanup();
-
-    for (auto& subWindow : subWindows) {
-        if (subWindow) {
-            subWindow->Cleanup();
-        }
-    }
-
-    subWindows.clear();
 }
 
 void Window::RegisterWindowClass() const {
@@ -58,6 +50,24 @@ void Window::Cleanup()
         DestroyWindow(windowHandle);
         windowHandle = nullptr;
     }
+
+    for (auto& subWindow : subWindows) {
+        if (subWindow) {
+            subWindow->Cleanup();
+        }
+    }
+
+    subWindows.clear();
+
+    if (currentlyLoadedFrame) {
+		currentlyLoadedFrame->Unload(this);
+		currentlyLoadedFrame.reset();
+	}
+
+    initialized = false;
+	title = L"";
+    menuResource = -1;
+	menuButtons.clear();
 }
 
 bool Window::Init() {
@@ -98,6 +108,15 @@ void Window::RegisterSubWindow(std::shared_ptr<SubWindow> subWindow) {
     subWindows.push_back(std::move(subWindow));
 }
 
+void Window::RegisterMenuButton(UINT id, std::function<void(Window *)> func)
+{
+	if (!windowHandle) {
+		std::cerr << "[ERROR] Window handle is null. Cannot register menu button." << std::endl;
+		return;
+	}
+	if (id && func) menuButtons[id] = func;
+}
+
 void Window::LoadFrame(std::shared_ptr<Frame> frame, const json& options) {
     if (!frame || (currentlyLoadedFrame && currentlyLoadedFrame->GetUniqueIdentifier() == frame->GetUniqueIdentifier())) {
         return;
@@ -105,6 +124,7 @@ void Window::LoadFrame(std::shared_ptr<Frame> frame, const json& options) {
 
     if (currentlyLoadedFrame) {
         currentlyLoadedFrame->Unload(this);
+        menuButtons.clear();
     }
 
     currentlyLoadedFrame = std::move(frame);
@@ -148,6 +168,7 @@ void Window::LoadInBackground(
             std::string response;
 
             if (usePost) {
+                std::cout << httpClient << std::endl;
                 response = httpClient->post(host, path, body, contentType, port);
             }
             else {
@@ -190,19 +211,21 @@ LRESULT Window::HandleMessage(UINT msg, WPARAM wp, LPARAM lp) {
         return 0;
     }
 
+    if (msg == WM_COMMAND) {
+		auto id = LOWORD(wp);
+		auto it = menuButtons.find(id);
+		if (it != menuButtons.end()) {
+			it->second(this);
+			return 0;
+		}
+    }
+
     if (currentlyLoadedFrame) {
         LRESULT res = currentlyLoadedFrame->HandleMessage(this, msg, wp, lp);
         if (res != Frame::NOT_HANDLED) return res;
     }
 
-    switch (msg) {
-    case WM_DESTROY:
-        PostQuitMessage(0);
-        return 0;
-
-    default:
-        return DefWindowProc(windowHandle, msg, wp, lp);
-    }
+    return DefWindowProc(windowHandle, msg, wp, lp);
 }
 
 void Window::SetSize(int w, int h) {

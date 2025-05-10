@@ -16,6 +16,7 @@ public:
     
     void RunOnBackgroundThread(std::function<void()> func) override;
     void PostToUIThread(std::function<void()> func) override;
+	void Cleanup() override;
 protected:
     LRESULT HandleMessage(UINT msg, WPARAM wp, LPARAM lp) override;
 

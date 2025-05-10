@@ -1,3 +1,8 @@
+// Window.h : Header file for the Window class definition.
+// Author: Jan Koeck
+// Created: 2025/02/26
+//
+
 #pragma once
 
 #include <Windows.h>
@@ -38,6 +43,7 @@ public:
     void SetMenuResource(int res);
 
     void RegisterSubWindow(std::shared_ptr<SubWindow> sw);
+    virtual void RegisterMenuButton(UINT id, std::function<void(Window*)> func);
 
     virtual void RunOnBackgroundThread(std::function<void()> func) = 0;
     virtual void PostToUIThread(std::function<void()> func) = 0;
@@ -69,14 +75,15 @@ private:
     DWORD                dwStyle = WS_OVERLAPPEDWINDOW;
     int                  menuResource = 0;
 
-    std::vector<std::shared_ptr<SubWindow>> subWindows;
-    std::shared_ptr<Frame>                  currentlyLoadedFrame;
+    std::vector<std::shared_ptr<SubWindow>>         subWindows;
+    std::shared_ptr<Frame>                          currentlyLoadedFrame;
+	std::unordered_map<UINT, std::function<void(Window*)>> menuButtons;
 
     static const std::wstring GENERIC_CLASS_NAME;
     static bool               classRegistered;
     static LRESULT CALLBACK StaticWndProc(HWND, UINT, WPARAM, LPARAM);
 
-    std::unique_ptr<HttpClient> httpClient;
+    std::unique_ptr<HttpClient> httpClient = std::make_unique<HttpClient>();
 
     void RegisterWindowClass() const;
 };

@@ -31,7 +31,7 @@ LRESULT MainWindow::HandleMessage(UINT msg, WPARAM wp, LPARAM lp)
 {
     switch (msg) {
     case WM_DESTROY:
-        StopBackgroundThread();
+		Cleanup();
         PostQuitMessage(0);
         return 0;
 	case WM_RUN_ON_UI_THREAD:
@@ -98,4 +98,10 @@ void MainWindow::PostToUIThread(std::function<void()> func)
 		uiCallbacks.push_back(std::move(func));
 	}
 	PostMessage(windowHandle, WM_RUN_ON_UI_THREAD, 0, 0);
+}
+
+void MainWindow::Cleanup()
+{
+	StopBackgroundThread();
+	Window::Cleanup();
 }

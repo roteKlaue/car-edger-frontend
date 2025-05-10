@@ -20,10 +20,6 @@ public:
     }
 
     void WakeUp(Window* win, const json& options) override;
-
-    void Unload(Window* win) override {
-        Frame::Unload(win);
-    }
 };
 
 
