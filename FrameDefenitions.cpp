@@ -34,6 +34,16 @@ static void OpenAbout(Window* win) {
 	DialogBox(GetModuleHandle(nullptr), MAKEINTRESOURCE(IDD_ABOUTBOX), win->GetWindowHandle(), About);
 }
 
+template <typename FrameType>
+static auto openFrame = []() {
+    return [](Window* win) {
+        auto frame = std::make_shared<FrameType>();
+        return win->LoadFrame(frame);
+    };
+};
+
+const static auto DEFAULT_STYLE_WITHOUT_RESIZE = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
+
 LoginFrame::LoginFrame() {
     auto largeFont = Util::CreatePointFont(16);
     auto largeXXLFont = Util::CreatePointFont(22);
@@ -119,17 +129,15 @@ void LoginFrame::WakeUp(Window* win, const json& options)
     Frame::WakeUp(win, options);
 
     win->SetTitle(L"Car Edger - Login");
-    win->SetStyle(WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX);
+    win->SetStyle(DEFAULT_STYLE_WITHOUT_RESIZE);
     win->SetSize(260, 350);
     win->SetMenuResource(IDC_LOGIN_MENU);
 
     win->RegisterMenuButton(ID_LOGIN_FILE_EXIT, Close);
 	win->RegisterMenuButton(ID_LOGIN_HELP_ABOUT, OpenAbout);
-	win->RegisterMenuButton(ID_LOGIN_FILE_REGISTER, [](Window* win) {
-		auto reg = std::make_shared<RegisterFrame>();
-		win->LoadFrame(reg, {});
-	});
-	usernameField->SetText(L"");
+	win->RegisterMenuButton(ID_LOGIN_FILE_REGISTER, openFrame<RegisterFrame>());
+
+    usernameField->SetText(L"");
 	passwordField->SetText(L"");
 	usernameField->SetFocus();
 }
@@ -144,6 +152,10 @@ void MainFrame::WakeUp(Window* win, const json& options)
     win->SetStyle(WS_OVERLAPPEDWINDOW);
 	win->SetMenuResource(IDC_MAIN_WINDOW_MENU);
     win->SetSize(1000, 500);
+
+    win->RegisterMenuButton(ID_WINDOW_EXIT, Close);
+    win->RegisterMenuButton(ID_HELP_ABOUT, OpenAbout);
+    win->RegisterMenuButton(ID_WINDOW_LOGOUT, openFrame<LoginFrame>());
 }
 
 RegisterFrame::RegisterFrame()
@@ -197,16 +209,13 @@ void RegisterFrame::WakeUp(Window* win, const json& options)
     Frame::WakeUp(win, options);
 
     win->SetTitle(L"Car Edger - Register");
-    win->SetStyle(WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX);
+    win->SetStyle(DEFAULT_STYLE_WITHOUT_RESIZE);
     win->SetSize(290, 350);
     win->SetMenuResource(IDC_REGISTER_MENU);
 
     win->RegisterMenuButton(ID_REGISTER_EXIT, Close);
     win->RegisterMenuButton(ID_REGISTER_HELP, OpenAbout);
-    win->RegisterMenuButton(ID_REGISTER_LOGIN, [](Window *win) {
-        auto log = std::make_shared<LoginFrame>();
-        win->LoadFrame(log, {});
-    });
+    win->RegisterMenuButton(ID_REGISTER_LOGIN, openFrame<LoginFrame>());
 
     usernameField->SetText(L"");
     passwordField->SetText(L"");
@@ -218,8 +227,8 @@ void RegisterFrame::OnRegisterClick()
     auto u = usernameField->GetText();
     auto p = passwordField->GetText();
     json j = {
-        {"username", Util::to_utf8(u)},
-        {"password", Util::to_utf8(p)}
+        { "username", Util::to_utf8(u) },
+        { "password", Util::to_utf8(p) }
     };
 
     auto win = this->win;
@@ -268,7 +277,7 @@ LRESULT LoaderFrame::HandleMessage(Window* win, UINT msg, WPARAM wp, LPARAM lp) 
     if (msg == WM_TIMER && wp == TIMER_ID) {
         UpdateAnimation();
         InvalidateRect(GetWindowHandle(), nullptr, TRUE);
-        return 0;
+        return 1;
     }
     return Frame::HandleMessage(win, msg, wp, lp);
 }

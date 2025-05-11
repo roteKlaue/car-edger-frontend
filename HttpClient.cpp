@@ -55,7 +55,7 @@ std::string HttpClient::sendRequest(const std::wstring& host, INTERNET_PORT port
     }
 
     std::string response;
-    char buffer[4096];
+    char buffer[4096]{};
     DWORD bytesRead;
 
     while (InternetReadFile(hRequest, buffer, sizeof(buffer) - 1, &bytesRead) && bytesRead) {

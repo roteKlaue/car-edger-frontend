@@ -168,33 +168,29 @@ void Window::LoadInBackground(
             std::string response;
 
             if (usePost) {
-                std::cout << httpClient << std::endl;
                 response = httpClient->post(host, path, body, contentType, port);
             }
             else {
                 response = httpClient->get(host, path, port);
             }
 
+            if (response.empty()) {
+                win->PostToUIThread([win, onSuccess]() { onSuccess({}); });
+                return;
+			}
+
             auto res = json::parse(response);
-            win->PostToUIThread([win, res, onSuccess]() {
-                onSuccess(res);
-            });
+            win->PostToUIThread([win, res, onSuccess]() { onSuccess(res); });
         }
         catch (const std::exception& e) {
             std::cerr << "[ERROR] Exception in LoadInBackground: " << e.what() << std::endl;
-            if (onError) {
-                win->PostToUIThread([e, onError]() {
-                    onError(e.what());
-                });
-            }
+            if (!onError) return;
+            win->PostToUIThread([e, onError]() { onError(e.what()); });
         }
         catch (...) {
             std::cerr << "[ERROR] Unknown exception in LoadInBackground" << std::endl;
-            if (onError) {
-                win->PostToUIThread([onError]() {
-                    onError("Unknown error");
-                });
-            }
+            if (!onError) return;
+            win->PostToUIThread([onError](){ onError("Unknown error"); });
         }
     });
 }
