@@ -33,3 +33,18 @@ void SubWindow::SetParent(Window* parent)
 	this->parent = parent;
 }
 
+void SubWindow::AssertUIThread() const {
+	if (!parent) {
+		throw std::runtime_error("SubWindow requires parent before using it.");
+		return;
+	}
+	parent->AssertUIThread();
+}
+
+void SubWindow::AssertBGThread() const {
+	if (!parent) {
+		throw std::runtime_error("SubWindow requires parent before using it.");
+		return;
+	}
+	parent->AssertBGThread();
+}

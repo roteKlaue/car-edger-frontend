@@ -14,6 +14,8 @@ public:
 
 	void RunOnBackgroundThread(std::function<void()> func) override;
 	void PostToUIThread(std::function<void()> func) override;
+	void AssertBGThread() const override;
+	void AssertUIThread() const override;
 private:
 	Window* parent = nullptr;
 };

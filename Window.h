@@ -47,6 +47,8 @@ public:
 
     virtual void RunOnBackgroundThread(std::function<void()> func) = 0;
     virtual void PostToUIThread(std::function<void()> func) = 0;
+	virtual void AssertBGThread() const = 0;
+    virtual void AssertUIThread() const = 0;
 
     using Callback = std::function<void(const json&)>;
     using ErrorCallback = std::function<void(const std::string&)>;

@@ -32,6 +32,7 @@ void Window::RegisterWindowClass() const {
 }
 
 void Window::Show() const {
+    AssertUIThread(); 
     if (!windowHandle) return;
     ShowWindow(windowHandle, nCmdShow);
     Update();
@@ -39,6 +40,7 @@ void Window::Show() const {
 
 void Window::Update() const
 {
+    AssertUIThread(); 
     InvalidateRect(windowHandle, nullptr, TRUE);
     UpdateWindow(windowHandle);
     DrawMenuBar(windowHandle);
@@ -118,6 +120,7 @@ void Window::RegisterMenuButton(UINT id, std::function<void(Window *)> func)
 }
 
 void Window::LoadFrame(std::shared_ptr<Frame> frame, const json& options) {
+    AssertUIThread(); 
     if (!frame || (currentlyLoadedFrame && currentlyLoadedFrame->GetUniqueIdentifier() == frame->GetUniqueIdentifier())) {
         return;
     }
@@ -159,6 +162,7 @@ void Window::LoadInBackground(
     ErrorCallback onError,
     bool usePost
 ) {
+    AssertUIThread(); 
     auto win = this;
     auto loaderFrame = std::make_shared<LoaderFrame>();
     win->LoadFrame(loaderFrame, {});

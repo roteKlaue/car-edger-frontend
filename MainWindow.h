@@ -17,6 +17,8 @@ public:
     void RunOnBackgroundThread(std::function<void()> func) override;
     void PostToUIThread(std::function<void()> func) override;
 	void Cleanup() override;
+    void AssertBGThread() const override;
+    void AssertUIThread() const override;
 protected:
     LRESULT HandleMessage(UINT msg, WPARAM wp, LPARAM lp) override;
 
@@ -32,4 +34,7 @@ private:
 
     std::mutex uiCallbackMutex;
     std::vector<std::function<void()>> uiCallbacks;
+
+    std::thread::id uiThreadId;
+    std::thread::id bgThreadId;
 };

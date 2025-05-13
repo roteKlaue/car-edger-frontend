@@ -4,10 +4,14 @@
 #include <iostream>
 
 MainWindow::MainWindow(HINSTANCE hInstance, int nCmdShow)
-    : Window(hInstance, nCmdShow)
+    : Window(hInstance, nCmdShow),
+	uiThreadId(std::this_thread::get_id()),
+	running(true)
 {
-    running = true;
-    backgroundThread = std::thread(&MainWindow::BackgroundLoop, this);
+	backgroundThread = std::thread([this]() {
+		bgThreadId = std::this_thread::get_id();
+		BackgroundLoop();
+	});
 }
 
 void MainWindow::SetTitle(const std::wstring& t) {
@@ -18,6 +22,8 @@ void MainWindow::SetTitle(const std::wstring& t) {
 
 void MainWindow::RunOnBackgroundThread(std::function<void()> func)
 {
+	AssertUIThread();
+
 	if (!running) {
         std::cerr << "[ERROR] Background thread is not running." << std::endl;
         return;
@@ -59,6 +65,8 @@ LRESULT MainWindow::HandleMessage(UINT msg, WPARAM wp, LPARAM lp)
 
 void MainWindow::BackgroundLoop()
 {
+	AssertBGThread();
+
 	while (running) {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
@@ -80,6 +88,30 @@ void MainWindow::BackgroundLoop()
 				std::cerr << "[ERROR] Unknown exception in background thread." << std::endl;
 			}
 		}
+	}
+}
+
+void MainWindow::AssertUIThread() const {
+	auto current = std::this_thread::get_id();
+	if (current != uiThreadId) {
+#ifdef _DEBUG
+		std::ostringstream oss;
+		oss << "UI thread assertion failed. Expected: " << uiThreadId
+			<< ", Got: " << current;
+		throw std::logic_error(oss.str());
+#else
+		std::cerr << "[WARNING] Not on UI thread!\n";
+#endif
+	}
+}
+
+void MainWindow::AssertBGThread() const {
+	if (std::this_thread::get_id() != bgThreadId) {
+#ifdef _DEBUG
+		throw std::logic_error("Must be called on background thread!");
+#else
+		std::cerr << "[WARNING] Not on background thread!\n";
+#endif
 	}
 }
 

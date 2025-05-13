@@ -35,6 +35,10 @@ static void OpenAbout(Window* win) {
 }
 
 template <typename FrameType>
+concept DerivedFromFrame = std::is_base_of_v<Frame, FrameType>;
+
+template <DerivedFromFrame FrameType>
+
 static auto openFrame = []() {
     return [](Window* win) {
         auto frame = std::make_shared<FrameType>();
