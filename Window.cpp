@@ -6,6 +6,18 @@
 #include <iostream>
 #include "SubWindow.h"
 #include "FrameDefenitions.h"
+#include "Component.h"
+#include <dwmapi.h>
+
+#pragma comment(lib, "dwmapi.lib")
+
+inline static void EnableBlur(Window *window) {
+    DWM_BLURBEHIND bb = {};
+    bb.dwFlags = DWM_BB_ENABLE;
+    bb.fEnable = TRUE;
+    bb.hRgnBlur = nullptr;
+    DwmEnableBlurBehindWindow(window->GetWindowHandle(), &bb);
+}
 
 const std::wstring Window::GENERIC_CLASS_NAME = L"GenericWndClass";
 bool               Window::classRegistered    = false;
@@ -89,6 +101,7 @@ bool Window::Init() {
         nullptr, nullptr, instance, this);
 
     if (!windowHandle) return false;
+    // EnableBlur(this);
     return initialized = true;
 }
 
@@ -218,6 +231,18 @@ LRESULT Window::HandleMessage(UINT msg, WPARAM wp, LPARAM lp) {
 			it->second(this);
 			return 0;
 		}
+    }
+
+	if (msg == WM_SIZE) {
+		width = LOWORD(lp);
+		height = HIWORD(lp);
+		if (currentlyLoadedFrame) {
+			currentlyLoadedFrame->OnParentResize(width, height);
+		}
+	}
+
+    if (msg == WM_NOTIFY) {
+        currentlyLoadedFrame->HandleNotify((NMHDR*)lp);
     }
 
     if (currentlyLoadedFrame) {

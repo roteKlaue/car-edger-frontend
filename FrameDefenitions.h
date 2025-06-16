@@ -9,6 +9,7 @@
 #include "Button.h"
 #include "Util.h"
 #include "HttpClient.h"
+#include "Table.h"
 
 class MainFrame : public Frame {
 
@@ -20,8 +21,9 @@ public:
     }
 
     void WakeUp(Window* win, const json& options) override;
+private:
+    std::shared_ptr<Table> table;
 };
-
 
 class LoginFrame : public Frame {
 private:

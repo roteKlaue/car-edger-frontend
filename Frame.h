@@ -31,6 +31,8 @@ public:
     virtual void OnPaint(HDC hdc);
 
     HWND GetWindowHandle() const;
+    void OnParentResize(unsigned int width, unsigned int height);
+    void HandleNotify(NMHDR* nmhdr);
 
 protected:
     Window* win = nullptr;

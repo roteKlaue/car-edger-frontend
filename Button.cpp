@@ -4,6 +4,8 @@
 
 Button::Button() : Component(), text(L"Button") {}
 
+Button::Button(std::wstring text) : Component(), text(std::move(text)) {}
+
 void Button::SetText(const std::wstring& text)
 {
     this->text = text;
@@ -24,6 +26,11 @@ void Button::Destroy()
 void Button::SetOnClick(std::function<void()> callback)
 {
     onClick = std::move(callback);
+}
+
+std::function<void()> Button::GetOnClick() const
+{
+	return onClick;
 }
 
 void Button::Create()

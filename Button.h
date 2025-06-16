@@ -8,6 +8,7 @@ class Button :
 {
 public:
     Button();
+    Button(std::wstring text);
     Button(const Button&) = delete;
     Button& operator=(const Button&) = delete;
 
@@ -16,6 +17,7 @@ public:
     std::wstring GetText() const override { return text; };
 
     void SetOnClick(std::function<void()> callback);
+    std::function<void()> GetOnClick() const;
     void Create() override;
 
 private:

@@ -24,6 +24,7 @@ class InputField : public Component
 {
 public:
 	InputField();
+	InputField(const InputFieldType type);
 	InputField(const InputField&) = delete;
 	InputField& operator=(const InputField&) = delete;
 	void Destroy() override;

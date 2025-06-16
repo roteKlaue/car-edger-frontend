@@ -12,6 +12,11 @@ InputField::InputField() : Component(),
 	placeholder(empty_str),
 	type(InputFieldType::TEXT){ }
 
+InputField::InputField(const InputFieldType type) : Component(),
+	text(empty_str),
+	placeholder(empty_str),
+	type(type) {}
+
 void InputField::Destroy()
 {
 	if (handle) {

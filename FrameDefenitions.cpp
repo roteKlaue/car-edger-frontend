@@ -146,7 +146,10 @@ void LoginFrame::WakeUp(Window* win, const json& options)
 	usernameField->SetFocus();
 }
 
-MainFrame::MainFrame() : Frame() {}
+MainFrame::MainFrame() : Frame() {
+    table = std::make_shared<Table>();
+    RegisterComponent(table);
+}
 
 void MainFrame::WakeUp(Window* win, const json& options)
 {
@@ -155,11 +158,18 @@ void MainFrame::WakeUp(Window* win, const json& options)
     win->SetTitle(L"Car Edger - Mainpage");
     win->SetStyle(WS_OVERLAPPEDWINDOW);
 	win->SetMenuResource(IDC_MAIN_WINDOW_MENU);
-    win->SetSize(1000, 500);
 
     win->RegisterMenuButton(ID_WINDOW_EXIT, Close);
     win->RegisterMenuButton(ID_HELP_ABOUT, OpenAbout);
     win->RegisterMenuButton(ID_WINDOW_LOGOUT, openFrame<LoginFrame>());
+
+    table->AddColumn(L"ID", 40);
+    table->AddColumn(L"Username", 150);
+    table->AddColumn(L"Email", 150);
+
+    table->AddRow({ L"1", L"matthias", L"matthias@example.com" });
+    table->SetPosition(0, 100);
+    win->SetSize(1000, 500);
 }
 
 RegisterFrame::RegisterFrame()
@@ -180,18 +190,15 @@ RegisterFrame::RegisterFrame()
     passwordField->SetFont(largeFont);
     passwordField->SetSize(250, 40);
 
-    registerText = std::make_shared<Text>();
-    registerText->SetText(L"Register to Car Edger");
+    registerText = std::make_shared<Text>(L"Register to Car Edger");
     registerText->SetPosition(10, 20);
     registerText->SetFont(largeXXLFont);
 
-    usernameLabel = std::make_shared<Text>();
+    usernameLabel = std::make_shared<Text>(L"Username:");
     usernameLabel->SetPosition(20, 80);
-    usernameLabel->SetText(L"Username:");
 
-    passwordLabel = std::make_shared<Text>();
+    passwordLabel = std::make_shared<Text>(L"Password:");
     passwordLabel->SetPosition(20, 180);
-    passwordLabel->SetText(L"Password:");
 
     registerButton = std::make_shared<Button>();
     registerButton->SetText(L"Register");

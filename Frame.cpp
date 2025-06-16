@@ -60,3 +60,21 @@ void Frame::OnPaint(HDC hdc)
 HWND Frame::GetWindowHandle() const {
     return win ? win->GetWindowHandle() : nullptr;
 }
+
+void Frame::OnParentResize(unsigned int width, unsigned int height)
+{
+	for (auto& comp : components) {
+        if (!comp) continue;
+        comp->OnParentResize(width, height);
+	}
+}
+
+void Frame::HandleNotify(NMHDR* nmhdr)
+{
+    for (auto c : this->components) {
+        if (c->GetID() == nmhdr->idFrom) {
+            c->HandleNotify(nmhdr);
+            break;
+        }
+    }
+}
