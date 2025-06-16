@@ -146,7 +146,6 @@
     <ClInclude Include="CarEdger.h" />
     <ClInclude Include="ClassRegisterer.h" />
     <ClInclude Include="Component.h" />
-    <ClInclude Include="CustomOwnerDrawListView.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="HttpClient.h" />
     <ClInclude Include="InputField.h" />
@@ -169,7 +168,6 @@
     <ClCompile Include="CarEdger.cpp" />
     <ClCompile Include="ClassRegisterer.cpp" />
     <ClCompile Include="Component.cpp" />
-    <ClCompile Include="CustomOwnerDrawListView.cpp" />
     <ClCompile Include="HttpClient.cpp" />
     <ClCompile Include="InputField.cpp" />
     <ClCompile Include="IOHandler.cpp" />

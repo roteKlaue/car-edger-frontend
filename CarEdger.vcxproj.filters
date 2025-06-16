@@ -72,9 +72,6 @@
     <ClInclude Include="SubWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CustomOwnerDrawListView.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Table.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -126,9 +123,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="SubWindow.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CustomOwnerDrawListView.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Table.cpp">

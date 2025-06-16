@@ -88,12 +88,12 @@ bool Window::Init() {
     RegisterWindowClass();
 
     RECT rc = { 0, 0, width, height };
-    AdjustWindowRect(&rc, dwStyle, menuResource != -1);
+    AdjustWindowRect(&rc, dwStyle | LVS_REPORT, menuResource != -1);
 
     int totalW = rc.right - rc.left;
     int totalH = rc.bottom - rc.top;
     windowHandle = CreateWindowW(
-        GENERIC_CLASS_NAME.c_str(), title.c_str(), dwStyle,
+        GENERIC_CLASS_NAME.c_str(), title.c_str(), dwStyle | LVS_REPORT,
         (width < 0 ? CW_USEDEFAULT : 0),
         (height < 0 ? CW_USEDEFAULT : 0),
         (width < 0 ? CW_USEDEFAULT : rc.right - rc.left),
@@ -242,6 +242,8 @@ LRESULT Window::HandleMessage(UINT msg, WPARAM wp, LPARAM lp) {
 	}
 
     if (msg == WM_NOTIFY) {
+        std::wcout << L"WM_NOTIFY from: " << ((NMHDR*)lp)->idFrom
+            << L", code: " << ((NMHDR*)lp)->code << std::endl;
         currentlyLoadedFrame->HandleNotify((NMHDR*)lp);
     }
 

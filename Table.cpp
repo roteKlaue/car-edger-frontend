@@ -4,8 +4,12 @@
 #include <iostream>
 #include <CommCtrl.h>
 
-Table::Table() {
-	InitCommonControls(); // Required for ListView
+#pragma comment(lib, "comctl32.lib")
+
+Table::Table()
+	: Component(),
+	onRowClick(nullptr) {
+	InitCommonControls();
 }
 
 void Table::Create()
@@ -14,7 +18,7 @@ void Table::Create()
 
 	handle = CreateWindowExW(
 		0, WC_LISTVIEW, L"",
-		WS_CHILD | WS_VISIBLE | LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS,
+		WS_CHILD | WS_VISIBLE | LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES,
 		x, y, width, height,
 		window->GetWindowHandle(),
 		(HMENU)(UINT_PTR)id,
@@ -75,12 +79,24 @@ void Table::AddRow(const std::vector<std::wstring>& rowData)
 
 void Table::HandleNotify(NMHDR* nmhdr)
 {
-	if (nmhdr->code == NM_CLICK || nmhdr->code == LVN_ITEMACTIVATE)
+	std::wcout << L"Table clicked" << std::endl;
+	switch (nmhdr->code) {
+		case NM_CLICK: std::wcout << L"NM_CLICK\n"; break;
+		case NM_DBLCLK: std::wcout << L"NM_DBLCLK\n"; break;
+		case NM_RETURN: std::wcout << L"NM_RETURN\n"; break;
+		case LVN_ITEMACTIVATE: std::wcout << L"LVN_ITEMACTIVATE\n"; break;
+		case LVN_ITEMCHANGED: std::wcout << L"LVN_ITEMCHANGED\n"; break;
+		default: std::wcout << L"Other code: " << nmhdr->code << std::endl; break;
+	}
+
+	if (nmhdr->code == NM_CLICK 
+		|| nmhdr->code == LVN_ITEMACTIVATE 
+		|| nmhdr->code == NM_RETURN)
 	{
 		LPNMITEMACTIVATE item = reinterpret_cast<LPNMITEMACTIVATE>(nmhdr);
+		std::wcout << L"Clicked iItem: " << item->iItem << std::endl;
 		if (item->iItem >= 0)
 		{
-			// You can now use item->iItem to identify which row was clicked
 			std::wcout << L"Row clicked: " + std::to_wstring(item->iItem) << std::endl;
 
 			if (onRowClick) onRowClick(item->iItem);
@@ -103,10 +119,8 @@ void Table::OnParentResize(unsigned int parentWidth, unsigned int parentHeight)
 {
 	if (!initialized || !handle) return;
 
-	// Resize to fit parent window, keeping the original x/y offsets
 	int newWidth = parentWidth - x;
 	int newHeight = parentHeight - y;
 
 	SetWindowPos(handle, nullptr, x, y, newWidth, newHeight, SWP_NOZORDER);
 }
-
