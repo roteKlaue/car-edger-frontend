@@ -21,7 +21,7 @@ cd vcpkg
 2. Add `nlohmann-json`
    ```bash
      .\vcpkg install nlohmann-json
-  ```
+   ```
 3. Clone the project
   ```bash
 git clone https://github.com/roteKlaue/car-edger-frontend.git
