@@ -35,4 +35,11 @@ cd car-edger-frontend
   - Build via Build → Build Solution (or press Ctrl+Shift+B)
   - Run with Debug → Start Without Debugging (or Ctrl+F5)
 
-
+## 🛠 Technologies Used
+- C++20 – Core language used for development
+- Win32 API – For creating the native GUI and handling system-level operations
+- Visual Studio 2022 – IDE for building and debugging
+- vcpkg – Dependency manager for C++ libraries
+- nlohmann/json – JSON library used for data serialization and configuration
+- Windows x64 – Target platform
+- GitHub Actions – Tried to use it for CI/CD and release automation but failed miserably. (Around 15 commits dedicated to this)
