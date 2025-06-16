@@ -3,9 +3,8 @@ CarEdger Frontend Appliction
 
 ## 🚀 Get Started
 
-### Prebuild
-
-
+### Prebuilt Binaries
+You can download prebuilt binaries from the [Releases page](https://github.com/roteKlaue/car-edger-frontend/releases).
 
 ### Manual
 #### Prerequisites
