@@ -42,3 +42,4 @@ cd car-edger-frontend
 - vcpkg – Dependency manager for C++ libraries
 - nlohmann/json – JSON library used for data serialization and configuration
 - Windows x64 – Target platform
+- GitHub Actions – Tried to use it for CI/CD and release automation but failed miserably. (Around 15 commits dedicated to this)
