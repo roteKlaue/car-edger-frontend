@@ -118,9 +118,28 @@ void Table::SetOnRowClick(const std::function<void(int)>& callback)
 void Table::OnParentResize(unsigned int parentWidth, unsigned int parentHeight)
 {
 	if (!initialized || !handle) return;
+	Adjust(parentWidth, parentHeight);
+}
 
-	int newWidth = parentWidth - x;
-	int newHeight = parentHeight - y;
+void Table::Adjust(int parentWidth, int parentHeight) {
+	int newWidth = parentWidth - x - rightOffset;
+	int newHeight = parentHeight - y - bottomOffset;
 
 	SetWindowPos(handle, nullptr, x, y, newWidth, newHeight, SWP_NOZORDER);
+}
+
+void Table::SetOffsets(int right, int bottom)
+{
+	rightOffset = right;
+	bottomOffset = bottom;
+}
+
+void Table::SetRightOffset(int offset)
+{
+	rightOffset = offset;
+}
+
+void Table::SetBottomOffset(int offset)
+{
+	bottomOffset = offset;
 }

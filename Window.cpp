@@ -132,6 +132,16 @@ void Window::RegisterMenuButton(UINT id, std::function<void(Window *)> func)
 	if (id && func) menuButtons[id] = func;
 }
 
+int Window::GetHeight() const
+{
+    return height;
+}
+
+int Window::GetWidth() const
+{
+	return width;
+}
+
 void Window::LoadFrame(std::shared_ptr<Frame> frame, const json& options) {
     AssertUIThread(); 
     if (!frame || (currentlyLoadedFrame && currentlyLoadedFrame->GetUniqueIdentifier() == frame->GetUniqueIdentifier())) {

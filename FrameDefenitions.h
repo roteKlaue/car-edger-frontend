@@ -25,6 +25,30 @@ private:
     std::shared_ptr<Table> table;
 };
 
+class DrivingFrame : public Frame {
+
+public:
+    DrivingFrame();
+
+    std::string GetUniqueIdentifier() const override { return "DrivingFrame"; }
+
+    void WakeUp(Window* win, const json& options) override;
+private:
+    std::shared_ptr<Table> table;
+};
+
+class DriverFrame : public Frame {
+
+public:
+    DriverFrame();
+
+    std::string GetUniqueIdentifier() const override { return "DriverFrame"; }
+
+    void WakeUp(Window* win, const json& options) override;
+private:
+    std::shared_ptr<Table> table;
+};
+
 class LoginFrame : public Frame {
 private:
 

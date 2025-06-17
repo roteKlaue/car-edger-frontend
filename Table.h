@@ -23,7 +23,15 @@ public:
 
 	void HandleNotify(NMHDR* nmhdr) override;
 	void OnParentResize(unsigned int parentWidth, unsigned int parentHeight) override;
+	void Adjust(int width, int height);
+
+	void SetOffsets(int right, int bottom);
+	void SetRightOffset(int offset);
+	void SetBottomOffset(int offset);
 private:
 	std::vector<std::wstring> columns;
 	std::function<void(int)> onRowClick;
+
+	int rightOffset = 0;
+	int bottomOffset = 0;
 };

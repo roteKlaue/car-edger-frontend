@@ -162,13 +162,16 @@ void MainFrame::WakeUp(Window* win, const json& options)
     win->RegisterMenuButton(ID_WINDOW_EXIT, Close);
     win->RegisterMenuButton(ID_HELP_ABOUT, OpenAbout);
     win->RegisterMenuButton(ID_WINDOW_LOGOUT, openFrame<LoginFrame>());
+    win->RegisterMenuButton(ID_VIEWALLDRIVES, openFrame<DrivingFrame>());
+    win->RegisterMenuButton(ID_VIEWALLDRIVERS, openFrame<DriverFrame>());
 
     table->AddColumn(L"ID", 40);
     table->AddColumn(L"Username", 150);
     table->AddColumn(L"Email", 150);
 
     table->AddRow({ L"1", L"matthias", L"matthias@example.com" });
-    table->SetPosition(0, 100);
+    table->SetPosition(0, 50);
+    table->Adjust(win->GetWidth(), win->GetHeight());
     win->SetSize(1000, 500);
 }
 
@@ -342,4 +345,64 @@ void LoaderFrame::DrawLoader(HDC hdc, RECT rect) const {
     FillRect(hdc, &fillRect, (HBRUSH)GetStockObject(WHITE_BRUSH));
 
     SetWorldTransform(hdc, &oldXForm);
+}
+
+DrivingFrame::DrivingFrame()
+{
+    table = std::make_shared<Table>();
+    RegisterComponent(table);
+}
+
+void DrivingFrame::WakeUp(Window* win, const json& options)
+{
+    Frame::WakeUp(win, options);
+
+    win->SetTitle(L"Car Edger - All Drives");
+    win->SetStyle(WS_OVERLAPPEDWINDOW);
+    win->SetMenuResource(IDC_MAIN_WINDOW_MENU);
+
+    win->RegisterMenuButton(ID_WINDOW_EXIT, Close);
+    win->RegisterMenuButton(ID_HELP_ABOUT, OpenAbout);
+    win->RegisterMenuButton(ID_VIEWALLDRIVERS, openFrame<DriverFrame>());
+    win->RegisterMenuButton(ID_WINDOW_LOGOUT, openFrame<LoginFrame>());
+    win->RegisterMenuButton(ID_VIEWALLCARS, openFrame<MainFrame>());
+
+    table->AddColumn(L"ID", 40);
+    table->AddColumn(L"Username", 150);
+    table->AddColumn(L"Email", 150);
+
+    table->AddRow({ L"1", L"matthias", L"matthias@example.com" });
+    table->SetPosition(0, 50);
+    table->Adjust(win->GetWidth(), win->GetHeight());
+    win->SetSize(1000, 500);
+}
+
+DriverFrame::DriverFrame()
+{
+    table = std::make_shared<Table>();
+    RegisterComponent(table);
+}
+
+void DriverFrame::WakeUp(Window* win, const json& options)
+{
+    Frame::WakeUp(win, options);
+
+    win->SetTitle(L"Car Edger - All Drivers");
+    win->SetStyle(WS_OVERLAPPEDWINDOW);
+    win->SetMenuResource(IDC_MAIN_WINDOW_MENU);
+
+    win->RegisterMenuButton(ID_WINDOW_EXIT, Close);
+    win->RegisterMenuButton(ID_HELP_ABOUT, OpenAbout);
+    win->RegisterMenuButton(ID_VIEWALLDRIVES, openFrame<DrivingFrame>());
+    win->RegisterMenuButton(ID_WINDOW_LOGOUT, openFrame<LoginFrame>());
+    win->RegisterMenuButton(ID_VIEWALLCARS, openFrame<MainFrame>());
+
+    table->AddColumn(L"ID", 40);
+    table->AddColumn(L"Username", 150);
+    table->AddColumn(L"Email", 150);
+
+    table->AddRow({ L"1", L"matthias", L"matthias@example.com" });
+    table->SetPosition(0, 50);
+    table->Adjust(win->GetWidth(), win->GetHeight());
+    win->SetSize(1000, 500);
 }
