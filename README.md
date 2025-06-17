@@ -1,15 +1,16 @@
 # car-edger-frontend
-CarEdger Frontend Appliction
+A native GUI application for interacting with the CarEdger backend.
 
 ## 🚀 Get Started
 
 ### Prebuilt Binaries
 You can download prebuilt binaries from the [Releases page](https://github.com/roteKlaue/car-edger-frontend/releases).
 
-### Manual
+### 🧰 Manual Build Instructions
 #### Prerequisites
 - `Visual Studio 2022` with the `C++` development workload installed
 - `vcpkg` package manager cloned and bootstrapped
+#### Step-by-Step Setup
 1. Install & Integrate `vcpkg`
     ```bash
     git clone https://github.com/microsoft/vcpkg.git
@@ -41,4 +42,4 @@ You can download prebuilt binaries from the [Releases page](https://github.com/r
 - vcpkg – Dependency manager for C++ libraries
 - nlohmann/json – JSON library used for data serialization and configuration
 - Windows x64 – Target platform
-- GitHub Actions – Tried to use it for CI/CD and release automation but failed miserably. (Around 15 commits dedicated to this)
+- GitHub Actions – CI/CD dreams (crashed and burned — see commit history for proof 🚒)
