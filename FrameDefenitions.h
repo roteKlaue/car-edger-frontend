@@ -133,8 +133,21 @@ public:
 
 class CreateDriverFrame : public Frame {
 public:
-    using Frame::Frame;
+    CreateDriverFrame();
+
     std::string GetUniqueIdentifier() const override {
         return "CreateDriverFrame";
     }
+
+    void WakeUp(Window* win, const json& options) override;
+
+private:
+    std::shared_ptr<InputField> nameField;
+    std::shared_ptr<InputField> licenseField;
+    std::shared_ptr<Text> titleText;
+    std::shared_ptr<Text> nameLabel;
+    std::shared_ptr<Text> licenseLabel;
+    std::shared_ptr<Button> createButton;
+
+    void OnCreateClick();
 };

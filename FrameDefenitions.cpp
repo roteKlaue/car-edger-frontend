@@ -3,6 +3,7 @@
 #include "Text.h"
 #include <nlohmann/json.hpp>
 #include "Window.h"
+#include "SubWindow.h"
 #include <cmath>
 
 using json = nlohmann::json;
@@ -420,4 +421,93 @@ void DriverFrame::WakeUp(Window* win, const json& options)
     table->SetPosition(0, 50);
     table->Adjust(win->GetWidth(), win->GetHeight());
     win->SetSize(1000, 500);
+}
+
+CreateDriverFrame::CreateDriverFrame()
+{
+    auto largeFont = Util::CreatePointFont(16);
+    auto largeXXLFont = Util::CreatePointFont(22);
+
+    titleText = std::make_shared<Text>(L"Create New Driver");
+    titleText->SetPosition(10, 20);
+    titleText->SetFont(largeXXLFont);
+
+    nameLabel = std::make_shared<Text>(L"Name:");
+    nameLabel->SetPosition(20, 80);
+
+    nameField = std::make_shared<InputField>();
+    nameField->SetPosition(20, 100);
+    nameField->SetFont(largeFont);
+    nameField->SetSize(250, 40);
+    nameField->SetPlaceholder(L"Driver name");
+
+    licenseLabel = std::make_shared<Text>(L"License Number:");
+    licenseLabel->SetPosition(20, 150);
+
+    licenseField = std::make_shared<InputField>();
+    licenseField->SetPosition(20, 170);
+    licenseField->SetFont(largeFont);
+    licenseField->SetSize(250, 40);
+    licenseField->SetPlaceholder(L"License number");
+
+    createButton = std::make_shared<Button>();
+    createButton->SetText(L"Create Driver");
+    createButton->SetPosition(50, 230);
+    createButton->SetSize(180, 40);
+    createButton->SetFont(largeFont);
+    createButton->SetOnClick([this]() { OnCreateClick(); });
+
+    RegisterComponent(titleText);
+    RegisterComponent(nameLabel);
+    RegisterComponent(nameField);
+    RegisterComponent(licenseLabel);
+    RegisterComponent(licenseField);
+    RegisterComponent(createButton);
+}
+
+void CreateDriverFrame::WakeUp(Window* win, const json& options)
+{
+    Frame::WakeUp(win, options);
+    win->SetTitle(L"Car Edger - Create Driver");
+    win->SetStyle(DEFAULT_STYLE_WITHOUT_RESIZE);
+    win->SetSize(300, 320);
+    win->SetMenuResource(-1);
+
+    nameField->SetText(L"");
+    licenseField->SetText(L"");
+    nameField->SetFocus();
+}
+
+void CreateDriverFrame::OnCreateClick()
+{
+    auto name = nameField->GetText();
+    auto license = licenseField->GetText();
+
+    json j = {
+        {"name", Util::to_utf8(name)},
+        {"licenseNumber", Util::to_utf8(license)}
+    };
+
+    auto win = dynamic_cast<SubWindow*>(this->win)->GetParent();
+    Close(this->win);
+    win->LoadInBackground(
+        L"localhost",
+        L"/car-edgers/drivers/create",
+        j.dump(),
+        "application/json",
+        8080,
+        [win](const json& res) {
+            if (res.value("success", false)) {
+                MessageBox(nullptr, L"Driver created successfully!", L"Success", MB_OK);
+                auto driverFrame = std::make_shared<DriverFrame>();
+                win->LoadFrame(driverFrame, res);
+            }
+            else {
+                MessageBox(nullptr, L"Failed to create driver.", L"Error", MB_ICONERROR);
+            }
+        },
+        [win](const std::string& err) {
+            MessageBoxA(nullptr, err.c_str(), "Error", MB_ICONERROR);
+        }
+    );
 }

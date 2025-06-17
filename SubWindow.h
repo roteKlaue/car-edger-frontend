@@ -18,6 +18,10 @@ public:
 	void AssertUIThread() const override;
 
 	std::function<void(Window*)> onCloseCallback = nullptr;
+
+	Window* GetParent() const {
+		return parent;
+	}
 private:
 	Window* parent = nullptr;
 };
