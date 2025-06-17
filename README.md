@@ -8,8 +8,8 @@ You can download prebuilt binaries from the [Releases page](https://github.com/r
 
 ### Manual
 #### Prerequisites
-    - `Visual Studio 2022` with the `C++` development workload installed
-    - `vcpkg` package manager cloned and bootstrapped
+- `Visual Studio 2022` with the `C++` development workload installed
+- `vcpkg` package manager cloned and bootstrapped
 1. Install & Integrate `vcpkg`
     ```bash
     git clone https://github.com/microsoft/vcpkg.git
