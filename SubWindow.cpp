@@ -3,11 +3,8 @@
 
 void SubWindow::SetTitle(const std::wstring& title)
 {
-	if (!parent) {
-		throw std::runtime_error("SubWindow requires parent before using it.");
-		return;
-	}
-	parent->SetTitle(title);
+	if (!initialized || !windowHandle) return;
+	SetWindowTextW(windowHandle, title.c_str());
 }
 
 void SubWindow::RunOnBackgroundThread(std::function<void()> func)

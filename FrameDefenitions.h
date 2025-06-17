@@ -114,3 +114,27 @@ private:
     static constexpr int FPS = 45;
     static constexpr int TIMER_ID = 1001;
 };
+
+class CreateCarFrame : public Frame {
+public:
+	using Frame::Frame;
+    std::string GetUniqueIdentifier() const override {
+        return "CreateCarFrame";
+    }
+};
+
+class CreateDriveFrame : public Frame {
+public:
+    using Frame::Frame;
+    std::string GetUniqueIdentifier() const override {
+        return "CreateDriveFrame";
+    }
+};
+
+class CreateDriverFrame : public Frame {
+public:
+    using Frame::Frame;
+    std::string GetUniqueIdentifier() const override {
+        return "CreateDriverFrame";
+    }
+};

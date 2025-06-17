@@ -16,6 +16,8 @@ public:
 	void PostToUIThread(std::function<void()> func) override;
 	void AssertBGThread() const override;
 	void AssertUIThread() const override;
+
+	std::function<void(Window*)> onCloseCallback = nullptr;
 private:
 	Window* parent = nullptr;
 };

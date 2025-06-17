@@ -65,6 +65,11 @@ public:
         ErrorCallback onError = nullptr,
         bool usePost = true
     );
+    std::shared_ptr<Window> ShowDialog(std::shared_ptr<Frame> frame);
+
+    virtual void OnInit() {};
+	virtual void OnClose() {};
+
 protected:
     virtual LRESULT HandleMessage(UINT msg, WPARAM wp, LPARAM lp);
     bool                 initialized = false;

@@ -46,6 +46,18 @@ static auto openFrame = []() {
     };
 };
 
+template <typename FrameType1>
+concept DerivedFromFrame1 = std::is_base_of_v<Frame, FrameType1>;
+
+template <DerivedFromFrame1 FrameType1>
+
+static auto openDialog = []() {
+    return [](Window* win) {
+        auto frame = std::make_shared<FrameType1>();
+        return win->ShowDialog(frame);
+    };
+};
+
 const static auto DEFAULT_STYLE_WITHOUT_RESIZE = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
 
 LoginFrame::LoginFrame() {
@@ -396,6 +408,9 @@ void DriverFrame::WakeUp(Window* win, const json& options)
     win->RegisterMenuButton(ID_VIEWALLDRIVES, openFrame<DrivingFrame>());
     win->RegisterMenuButton(ID_WINDOW_LOGOUT, openFrame<LoginFrame>());
     win->RegisterMenuButton(ID_VIEWALLCARS, openFrame<MainFrame>());
+    win->RegisterMenuButton(ID_NEW_DRIVER, openDialog<CreateDriverFrame>());
+    win->RegisterMenuButton(ID_NEW_DRIVE, openDialog<CreateDriveFrame>());
+    win->RegisterMenuButton(ID_NEW_CAR, openDialog<CreateCarFrame>());
 
     table->AddColumn(L"ID", 40);
     table->AddColumn(L"Username", 150);

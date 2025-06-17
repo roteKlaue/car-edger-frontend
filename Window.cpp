@@ -102,6 +102,7 @@ bool Window::Init() {
 
     if (!windowHandle) return false;
     // EnableBlur(this);
+    OnInit();
     return initialized = true;
 }
 
@@ -222,6 +223,45 @@ void Window::LoadInBackground(
     });
 }
 
+std::shared_ptr<Window> Window::ShowDialog(std::shared_ptr<Frame> frame) {
+    auto dialog = std::make_shared<SubWindow>(instance, nCmdShow);
+    dialog->SetParent(this);
+    dialog->SetSize(300, 200);
+    dialog->SetTitle(L"Dialog");
+    dialog->SetStyle(WS_CAPTION | WS_POPUPWINDOW | WS_VISIBLE | WS_SYSMENU);
+
+    if (!dialog->Init()) {
+        return nullptr;
+    }
+
+    RECT parentRect;
+    GetWindowRect(this->windowHandle, &parentRect);
+    int dlgW = dialog->GetWidth();
+    int dlgH = dialog->GetHeight();
+    int x = parentRect.left + ((parentRect.right - parentRect.left) - dlgW) / 2;
+    int y = parentRect.top + ((parentRect.bottom - parentRect.top) - dlgH) / 2;
+    SetWindowPos(dialog->GetWindowHandle(), HWND_TOP, x, y, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+
+    EnableWindow(this->windowHandle, FALSE);
+    dialog->LoadFrame(std::move(frame), {});
+
+    dialog->Show();
+
+    MSG msg;
+    while (IsWindow(dialog->GetWindowHandle()) && GetMessage(&msg, nullptr, 0, 0)) {
+        if (!IsDialogMessage(dialog->GetWindowHandle(), &msg)) {
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
+        }
+    }
+
+    EnableWindow(this->windowHandle, TRUE);
+    SetActiveWindow(this->windowHandle);
+
+    if (dialog->onCloseCallback) dialog->onCloseCallback(this);
+    return dialog;
+}
+
 LRESULT Window::HandleMessage(UINT msg, WPARAM wp, LPARAM lp) {
     if (msg == WM_PAINT) {
         PAINTSTRUCT ps;
@@ -314,4 +354,3 @@ void Window::SetMenuResource(int res) {
     }
     DrawMenuBar(windowHandle);
 }
-
