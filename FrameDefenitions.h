@@ -22,6 +22,7 @@ public:
 
     void WakeUp(Window* win, const json& options) override;
 private:
+    std::shared_ptr<Text> titleText;
     std::shared_ptr<Table> table;
 };
 
@@ -34,6 +35,7 @@ public:
 
     void WakeUp(Window* win, const json& options) override;
 private:
+    std::shared_ptr<Text> titleText;
     std::shared_ptr<Table> table;
 };
 
@@ -47,6 +49,7 @@ public:
     void WakeUp(Window* win, const json& options) override;
 private:
     std::shared_ptr<Table> table;
+	std::shared_ptr<Text> titleText;
 };
 
 class LoginFrame : public Frame {
@@ -117,10 +120,30 @@ private:
 
 class CreateCarFrame : public Frame {
 public:
-	using Frame::Frame;
+	CreateCarFrame();
     std::string GetUniqueIdentifier() const override {
         return "CreateCarFrame";
     }
+	void WakeUp(Window* win, const json& options) override;
+private:
+    void OnCreateClick();
+
+    std::shared_ptr<Button> createButton;
+
+    std::shared_ptr<Text> titleText;
+    std::shared_ptr<Text> makeLabel;
+    std::shared_ptr<Text> yearLabel;
+    std::shared_ptr<Text> fuelLabel;
+    std::shared_ptr<Text> modelLabel;
+    std::shared_ptr<Text> numBladeLabel;
+    std::shared_ptr<Text> avgConsumptionLabel;
+
+    std::shared_ptr<InputField> makeField;
+    std::shared_ptr<InputField> yearField;
+    std::shared_ptr<InputField> fuelField;
+    std::shared_ptr<InputField> modelField;
+    std::shared_ptr<InputField> numBladeField;
+    std::shared_ptr<InputField> avgConsumptionField;
 };
 
 class CreateDriveFrame : public Frame {
@@ -134,20 +157,18 @@ public:
 class CreateDriverFrame : public Frame {
 public:
     CreateDriverFrame();
-
     std::string GetUniqueIdentifier() const override {
         return "CreateDriverFrame";
     }
-
     void WakeUp(Window* win, const json& options) override;
-
 private:
-    std::shared_ptr<InputField> nameField;
-    std::shared_ptr<InputField> licenseField;
+    std::shared_ptr<InputField> firstNameField;
+    std::shared_ptr<InputField> lastNameField;
+    // std::shared_ptr<InputField> birthdayField;
     std::shared_ptr<Text> titleText;
-    std::shared_ptr<Text> nameLabel;
-    std::shared_ptr<Text> licenseLabel;
+    std::shared_ptr<Text> firstNameLabel;
+    std::shared_ptr<Text> lastNameLabel;
+    // std::shared_ptr<Text> birthdayLabel;
     std::shared_ptr<Button> createButton;
-
     void OnCreateClick();
 };

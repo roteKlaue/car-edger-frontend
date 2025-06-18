@@ -9,6 +9,9 @@
 Table::Table()
 	: Component(),
 	onRowClick(nullptr) {
+	INITCOMMONCONTROLSEX iccex{};
+	iccex.dwSize = sizeof(iccex);
+	iccex.dwICC = ICC_LISTVIEW_CLASSES;
 	InitCommonControls();
 }
 
@@ -28,6 +31,8 @@ void Table::Create()
 
 	if (!handle) return;
 
+	ListView_SetExtendedListViewStyle(handle,
+		LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 	SetFont(hFont);
 	initialized = true;
 }
@@ -64,16 +69,17 @@ void Table::AddColumn(const std::wstring& header, int colWidth, int index)
 void Table::AddRow(const std::vector<std::wstring>& rowData)
 {
 	if (!initialized || rowData.empty()) return;
-
 	LVITEMW item{};
 	item.mask = LVIF_TEXT;
 	item.iItem = ListView_GetItemCount(handle);
 	item.pszText = const_cast<LPWSTR>(rowData[0].c_str());
-	ListView_InsertItem(handle, &item);
 
-	for (size_t i = 1; i < rowData.size(); ++i)
+	int i = ListView_InsertItem(handle, &item);
+	if (i == -1) return;
+
+	for (size_t col = 1; col < rowData.size(); ++col)
 	{
-		ListView_SetItemText(handle, item.iItem, static_cast<int>(i), const_cast<LPWSTR>(rowData[i].c_str()));
+		ListView_SetItemText(handle, i, static_cast<int>(col), const_cast<LPWSTR>(rowData[col].c_str()));
 	}
 }
 
