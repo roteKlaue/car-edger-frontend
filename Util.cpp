@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Util.h"
 #include <atomic>
+#include <sstream>
 
 static std::atomic<UINT> s_nextMenuId = 1;
 
@@ -51,4 +52,15 @@ std::wstring Util::to_utf16(const std::string& str) {
     std::wstring result(size, 0);
     MultiByteToWideChar(CP_UTF8, 0, str.data(), static_cast<int>(str.size()), result.data(), size);
     return result;
+}
+
+std::optional<double> Util::WStringToNumber(const std::wstring& str) {
+    std::wistringstream stream(str);
+    double value;
+    stream >> value;
+
+    if (!stream.fail() && stream.eof())
+        return value;
+
+    return std::nullopt;
 }

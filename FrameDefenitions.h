@@ -148,10 +148,37 @@ private:
 
 class CreateDriveFrame : public Frame {
 public:
-    using Frame::Frame;
+    CreateDriveFrame();
     std::string GetUniqueIdentifier() const override {
         return "CreateDriveFrame";
     }
+    void WakeUp(Window* win, const json& options) override;
+
+private:
+    void OnCreateClick();
+
+    std::shared_ptr<Button> createButton;
+
+    std::shared_ptr<Text> titleText;
+    std::shared_ptr<Text> locationBeginLabel;
+    std::shared_ptr<Text> locationEndLabel;
+    std::shared_ptr<Text> dateLabel;
+    std::shared_ptr<Text> timeLabel;
+    std::shared_ptr<Text> kmBeginLabel;
+    std::shared_ptr<Text> kmEndLabel;
+    std::shared_ptr<Text> consumptionLabel;
+    std::shared_ptr<Text> driverLabel;
+    std::shared_ptr<Text> carLabel;
+
+    std::shared_ptr<InputField> locationBeginField;
+    std::shared_ptr<InputField> locationEndField;
+    std::shared_ptr<InputField> dateField;
+    std::shared_ptr<InputField> timeField;
+    std::shared_ptr<InputField> kmBeginField;
+    std::shared_ptr<InputField> kmEndField;
+    std::shared_ptr<InputField> consumptionField;
+    std::shared_ptr<InputField> driverField;
+    std::shared_ptr<InputField> carField;
 };
 
 class CreateDriverFrame : public Frame {
@@ -171,4 +198,26 @@ private:
     // std::shared_ptr<Text> birthdayLabel;
     std::shared_ptr<Button> createButton;
     void OnCreateClick();
+};
+
+class DriveDetailFrame : public Frame {
+public:
+    DriveDetailFrame();
+
+    std::string GetUniqueIdentifier() const override {
+        return "DriveDetailFrame";
+    }
+
+    void WakeUp(Window* win, const json& options) override;
+private:
+    std::shared_ptr<Text> titleText;
+    std::shared_ptr<Text> locationBeginText;
+    std::shared_ptr<Text> locationEndText;
+    std::shared_ptr<Text> dateText;
+    std::shared_ptr<Text> timeText;
+    std::shared_ptr<Text> kmBeginText;
+    std::shared_ptr<Text> kmEndText;
+    std::shared_ptr<Text> consumptionText;
+    std::shared_ptr<Text> vehicleNumBladeText;
+    std::shared_ptr<Text> driverIdText;
 };

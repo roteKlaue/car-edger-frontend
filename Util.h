@@ -7,6 +7,7 @@
 
 #include <windows.h>
 #include <string>
+#include <optional>
 
 namespace Util {
 	/**
@@ -36,4 +37,8 @@ namespace Util {
 	 * @return A UTF-16 encoded std::wstring.
 	 */
 	std::wstring to_utf16(const std::string& str);
+
+	std::optional<double> WStringToNumber(const std::wstring& str);
 }
+
+

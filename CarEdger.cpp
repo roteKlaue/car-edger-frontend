@@ -59,7 +59,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, // handle to the current instanc
     }
 
     std::wcout << L"[DEBUG] Window initialized successfully." << std::endl;
-    auto loginFrame = std::make_shared<MainFrame>();
+    auto loginFrame = std::make_shared<LoginFrame>();
     appWindow.LoadFrame(loginFrame);
     appWindow.Show();
 

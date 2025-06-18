@@ -192,8 +192,8 @@ void MainFrame::WakeUp(Window* win, const json& options)
     table->AddColumn(L"License Plate", 120);
     table->AddColumn(L"Year", 60);
     table->AddColumn(L"Model", 150);
-    table->AddColumn(L"Make", 150);
-    table->AddColumn(L"Fuel", 100);
+    table->AddColumn(L"Brand", 150);
+    table->AddColumn(L"Fuel Type", 100);
     table->AddColumn(L"Avg Consumption", 150);
 
     table->SetPosition(0, 50);
@@ -202,12 +202,9 @@ void MainFrame::WakeUp(Window* win, const json& options)
 
     if (options.is_array()) {
         for (const auto& vehicle : options) {
-            std::wstring licensePlate = L"";
-            if (!vehicle["num_Blade"].is_null()) {
-                licensePlate = Util::to_utf16(vehicle["num_Blade"].get<std::string>());
-            }
+            std::wstring licensePlate = vehicle["num_Blade"].is_null() ? L"" : Util::to_utf16(vehicle["num_Blade"].get<std::string>());
             std::wstring year = vehicle["year"].is_null() ? L"" : Util::to_utf16(std::to_string(vehicle["year"].get<int>()));
-            std::wstring model = vehicle["Model"].is_null() ? L"" : Util::to_utf16(vehicle["Model"].get<std::string>());
+            std::wstring model = vehicle["model"].is_null() ? L"" : Util::to_utf16(vehicle["model"].get<std::string>());
             std::wstring make = vehicle["make"].is_null() ? L"" : Util::to_utf16(vehicle["make"].get<std::string>());
             std::wstring fuel = vehicle["fuel"].is_null() ? L"" : Util::to_utf16(vehicle["fuel"].get<std::string>());
             std::wstring avgConsumption = vehicle["avg_consumption"].is_null() ? L"" : Util::to_utf16(vehicle["avg_consumption"].get<std::string>());
@@ -215,10 +212,9 @@ void MainFrame::WakeUp(Window* win, const json& options)
         }
     }
     else {
-        return;
         win->LoadInBackground(
             L"localhost",
-            L"/car-edgers/cars/all",
+            L"/car-edgers/vehicles/all",
             {},
             "application/json",
             8080,
@@ -410,6 +406,18 @@ void LoaderFrame::DrawLoader(HDC hdc, RECT rect) const {
     SetWorldTransform(hdc, &oldXForm);
 }
 
+#include "pch.h"
+#include "FrameDefenitions.h"
+#include "Text.h"
+#include <nlohmann/json.hpp>
+#include "Window.h"
+#include "SubWindow.h"
+#include <cmath>
+
+using json = nlohmann::json;
+
+// ... Existing code for other frames ...
+
 DrivingFrame::DrivingFrame()
 {
     auto largeFont = Util::CreatePointFont(16);
@@ -439,15 +447,93 @@ void DrivingFrame::WakeUp(Window* win, const json& options)
     win->RegisterMenuButton(ID_NEW_DRIVER, openDialog<CreateDriverFrame>());
     win->RegisterMenuButton(ID_NEW_DRIVE, openDialog<CreateDriveFrame>());
     win->RegisterMenuButton(ID_NEW_CAR, openDialog<CreateCarFrame>());
+
     table->Clear();
 
     table->AddColumn(L"ID", 40);
-    table->AddColumn(L"Username", 150);
-    table->AddColumn(L"Email", 150);
+    table->AddColumn(L"Location Begin", 120);
+    table->AddColumn(L"Location End", 120);
+    table->AddColumn(L"Date", 100);
+    table->AddColumn(L"Time", 80);
+    table->AddColumn(L"Km Begin", 90);
+    table->AddColumn(L"Km End", 90);
+    table->AddColumn(L"Consumption", 100);
+    table->AddColumn(L"Vehicle Num Blade", 150);
+    table->AddColumn(L"Driver ID", 60);
 
-    table->AddRow({ L"1", L"matthias", L"matthias@example.com" });
-    table->AddRow({ L"1", L"matthias", L"matthias@example.com" });
-    table->AddRow({ L"1", L"matthias", L"matthias@example.com" });
+    if (options.is_array()) {
+        int rowId = 1;
+
+        for (int i = 0; i < options.size(); i++) {
+            auto drive = options.at(i);
+            std::cout << drive.dump(5) << std::endl;
+
+            std::wstring locationBegin = drive["location_begin"].is_null() ? L"" : Util::to_utf16(drive["location_begin"].get<std::string>());
+            std::wstring locationEnd = drive["location_end"].is_null() ? L"" : Util::to_utf16(drive["location_end"].get<std::string>());
+            std::wstring date = drive["date"].is_null() ? L"" : Util::to_utf16(drive["date"].get<std::string>());
+            std::wstring time = drive["time"].is_null() ? L"" : Util::to_utf16(drive["time"].get<std::string>());
+            std::wstring kmBegin = drive["km_begin"].is_null() ? L"" : Util::to_utf16(drive["Km_begin"].get<std::string>());
+            std::wstring kmEnd = drive["km_end"].is_null() ? L"" : Util::to_utf16(drive["Km_end"].get<std::string>());
+            std::wstring consumption;
+            if (drive["consumtion"].is_number()) {
+                consumption = Util::to_utf16(std::to_string(drive["consumtion"].get<double>()));
+            }
+            else {
+                consumption = L"";
+            }
+
+            std::wstring vehicleNumBlade = L"";
+            if (drive.contains("vehicle") && drive["vehicle"].is_object() && !drive["vehicle"]["num_blade"].is_null()) {
+                vehicleNumBlade = Util::to_utf16(drive["vehicle"]["num_blade"].get<std::string>());
+            }
+
+            std::wstring driverId = L"";
+            if (drive.contains("driver") && drive["driver"].is_object() && !drive["driver"]["driverId"].is_null()) {
+                driverId = Util::to_utf16(std::to_string(drive["driver"]["driverId"].get<int>()));
+            }
+
+            table->AddRow({
+                Util::to_utf16(std::to_string(rowId++)),
+                locationBegin,
+                locationEnd,
+                date,
+                time,
+                kmBegin,
+                kmEnd,
+                consumption,
+                vehicleNumBlade,
+                driverId
+                });
+        }
+
+        table->SetOnRowClick([options, win](int indexInverse) {
+            int actual = options.size() - 1 - indexInverse;
+            auto frame = std::make_shared<DriveDetailFrame>();
+            win->LoadFrame(frame, options.at(actual));
+            });
+    }
+    else {
+        win->LoadInBackground(
+            L"localhost",
+            L"/car-edgers/drives/all",
+            {},
+            "application/json",
+            8080,
+            [win](const json& res) {
+                auto frame = std::make_shared<DrivingFrame>();
+                win->LoadFrame(frame, res);
+            },
+            [win](const std::string& err) {
+                std::cout << "[ERROR] Loading Drives Error: " << err << std::endl;
+                MessageBoxA(nullptr, err.c_str(), "Drive Loading Error", MB_ICONERROR);
+                auto loginFrame = std::make_shared<LoginFrame>();
+                win->LoadFrame(loginFrame);
+            },
+            false
+        );
+        return;
+    }
+
     table->SetPosition(0, 50);
     table->Adjust(win->GetWidth(), win->GetHeight());
     win->SetSize(1000, 500);
@@ -611,8 +697,6 @@ void CreateDriverFrame::OnCreateClick() {
             "application/json",
             8080,
             [parent](const json& res) {
-                std::cout << "[DEBUG] Driver created successfully: " << res.dump() << std::endl;
-                MessageBox(nullptr, L"Driver created successfully!", L"Success", MB_OK);
                 auto driverFrame = std::make_shared<DriverFrame>();
                 parent->LoadFrame(driverFrame, {});
             },
@@ -658,7 +742,7 @@ CreateCarFrame::CreateCarFrame() {
     modelField->SetSize(250, 40);
     modelField->SetPlaceholder(L"Car's model");
 
-    makeLabel = std::make_shared<Text>(L"Make:");
+    makeLabel = std::make_shared<Text>(L"Brand:");
     makeLabel->SetPosition(20, 290);
 
     makeField = std::make_shared<InputField>();
@@ -666,7 +750,7 @@ CreateCarFrame::CreateCarFrame() {
     makeField->SetFont(largeFont);
     makeField->SetSize(250, 40);
 
-    fuelLabel = std::make_shared<Text>(L"Fuel:");
+    fuelLabel = std::make_shared<Text>(L"Fuel Type:");
     fuelLabel->SetPosition(20, 360);
 
     fuelField = std::make_shared<InputField>();
@@ -726,31 +810,31 @@ void CreateCarFrame::WakeUp(Window* win, const json& options) {
 }
 
 void CreateCarFrame::OnCreateClick() {
+    auto avgConsumption = avgConsumptionField->GetText();
     auto numBlade = numBladeField->GetText();
-    auto year = yearField->GetText();
     auto model = modelField->GetText();
+    auto year = yearField->GetText();
     auto make = makeField->GetText();
     auto fuel = fuelField->GetText();
-    auto avgConsumption = avgConsumptionField->GetText();
+
     json j = {
-        {"num_Blade", Util::to_utf8(numBlade)},
-        {"year", Util::to_utf8(year)},
-        {"Model", Util::to_utf8(model)},
-        {"make", Util::to_utf8(make)},
-        {"fuel", Util::to_utf8(fuel)},
-        {"avg_consumption", Util::to_utf8(avgConsumption)}
+        { "num_Blade", Util::to_utf8(numBlade) },
+        { "year", Util::to_utf8(year) },
+        { "Model", Util::to_utf8(model) },
+        { "make", Util::to_utf8(make) },
+        { "fuel", Util::to_utf8(fuel) },
+        { "avg_consumption", Util::to_utf8(avgConsumption) }
     };
+
     auto win = dynamic_cast<SubWindow*>(this->win);
     win->onCloseCallback = [j](Window* parent) {
         parent->LoadInBackground(
             L"localhost",
-            L"/car-edgers/cars/create",
+            L"/car-edgers/vehicles/create",
             j.dump(),
             "application/json",
             8080,
             [parent](const json& res) {
-                std::cout << "[DEBUG] Car created successfully: " << res.dump() << std::endl;
-                MessageBox(nullptr, L"Car created successfully!", L"Success", MB_OK);
                 auto mainFrame = std::make_shared<MainFrame>();
                 parent->LoadFrame(mainFrame, {});
             },
@@ -758,6 +842,302 @@ void CreateCarFrame::OnCreateClick() {
                 MessageBoxA(nullptr, err.c_str(), "Error", MB_ICONERROR);
             }
         );
+    };
+    Close(this->win);
+}
+
+CreateDriveFrame::CreateDriveFrame() {
+    auto largeFont = Util::CreatePointFont(16);
+    auto largeXXLFont = Util::CreatePointFont(22);
+
+    titleText = std::make_shared<Text>(L"Create New Drive");
+    titleText->SetPosition(30, 20);
+    titleText->SetFont(largeXXLFont);
+
+    locationBeginLabel = std::make_shared<Text>(L"Location Begin:");
+    locationBeginLabel->SetPosition(20, 80);
+
+    locationBeginField = std::make_shared<InputField>();
+    locationBeginField->SetPosition(20, 100);
+    locationBeginField->SetFont(largeFont);
+    locationBeginField->SetSize(250, 40);
+    locationBeginField->SetPlaceholder(L"Start location");
+
+    locationEndLabel = std::make_shared<Text>(L"Location End:");
+    locationEndLabel->SetPosition(20, 150);
+
+    locationEndField = std::make_shared<InputField>();
+    locationEndField->SetPosition(20, 170);
+    locationEndField->SetFont(largeFont);
+    locationEndField->SetSize(250, 40);
+    locationEndField->SetPlaceholder(L"End location");
+
+    dateLabel = std::make_shared<Text>(L"Date (YYYY-MM-DD):");
+    dateLabel->SetPosition(20, 220);
+
+    dateField = std::make_shared<InputField>();
+    dateField->SetPosition(20, 240);
+    dateField->SetFont(largeFont);
+    dateField->SetSize(250, 40);
+    dateField->SetPlaceholder(L"Date");
+
+    timeLabel = std::make_shared<Text>(L"Time (HH:MM):");
+    timeLabel->SetPosition(20, 290);
+
+    timeField = std::make_shared<InputField>();
+    timeField->SetPosition(20, 310);
+    timeField->SetFont(largeFont);
+    timeField->SetSize(250, 40);
+    timeField->SetPlaceholder(L"Time");
+
+    kmBeginLabel = std::make_shared<Text>(L"Km Begin:");
+    kmBeginLabel->SetPosition(20, 360);
+
+    kmBeginField = std::make_shared<InputField>();
+    kmBeginField->SetPosition(20, 380);
+    kmBeginField->SetFont(largeFont);
+    kmBeginField->SetSize(250, 40);
+    kmBeginField->SetPlaceholder(L"Kilometers at start");
+
+    kmEndLabel = std::make_shared<Text>(L"Km End:");
+    kmEndLabel->SetPosition(20, 440);
+
+    kmEndField = std::make_shared<InputField>();
+    kmEndField->SetPosition(20, 460);
+    kmEndField->SetFont(largeFont);
+    kmEndField->SetSize(250, 40);
+    kmEndField->SetPlaceholder(L"Kilometers at end");
+
+    consumptionLabel = std::make_shared<Text>(L"Consumption (L/100km):");
+    consumptionLabel->SetPosition(20, 520);
+
+    consumptionField = std::make_shared<InputField>();
+    consumptionField->SetPosition(20, 540);
+    consumptionField->SetFont(largeFont);
+    consumptionField->SetSize(250, 40);
+    consumptionField->SetPlaceholder(L"Fuel consumption");
+
+    carLabel = std::make_shared<Text>(L"Car (license plate):");
+    carLabel->SetPosition(20, 600);
+
+    carField = std::make_shared<InputField>();
+    carField->SetPosition(20, 620);
+    carField->SetFont(largeFont);
+    carField->SetSize(250, 40);
+    carField->SetPlaceholder(L"Car license plate");
+
+    driverLabel = std::make_shared<Text>(L"Driver (driver id):");
+    driverLabel->SetPosition(20, 680);
+
+    driverField = std::make_shared<InputField>();
+    driverField->SetPosition(20, 700);
+    driverField->SetFont(largeFont);
+    driverField->SetSize(250, 40);
+    driverField->SetPlaceholder(L"Driver (driver id)");
+
+    createButton = std::make_shared<Button>();
+    createButton->SetText(L"Create Drive");
+    createButton->SetPosition(50, 750);
+    createButton->SetSize(180, 40);
+    createButton->SetFont(largeFont);
+    createButton->SetOnClick([this]() { OnCreateClick(); });
+
+    RegisterComponent(titleText);
+    RegisterComponent(locationBeginLabel);
+    RegisterComponent(locationBeginField);
+    RegisterComponent(locationEndLabel);
+    RegisterComponent(locationEndField);
+    RegisterComponent(dateLabel);
+    RegisterComponent(dateField);
+    RegisterComponent(timeLabel);
+    RegisterComponent(timeField);
+    RegisterComponent(kmBeginLabel);
+    RegisterComponent(kmBeginField);
+    RegisterComponent(kmEndLabel);
+    RegisterComponent(kmEndField);
+    RegisterComponent(consumptionLabel);
+    RegisterComponent(consumptionField);
+    RegisterComponent(carLabel);
+    RegisterComponent(carField);
+    RegisterComponent(driverLabel);
+    RegisterComponent(driverField);
+    RegisterComponent(createButton);
+}
+
+void CreateDriveFrame::WakeUp(Window* win, const json& options) {
+    Frame::WakeUp(win, options);
+
+    win->SetTitle(L"Car Edger - Create Drive");
+    win->SetStyle(DEFAULT_STYLE_WITHOUT_RESIZE);
+    win->SetSize(290, 800);
+    win->SetMenuResource(-1);
+
+    locationBeginField->SetText(L"");
+    locationEndField->SetText(L"");
+    dateField->SetText(L"");
+    timeField->SetText(L"");
+    kmBeginField->SetText(L"");
+    kmEndField->SetText(L"");
+    consumptionField->SetText(L"");
+
+    locationBeginField->SetFocus();
+}
+
+void CreateDriveFrame::OnCreateClick() {
+    auto locationBegin = locationBeginField->GetText();
+    auto locationEnd = locationEndField->GetText();
+    auto date = dateField->GetText();
+    auto time = timeField->GetText();
+    auto kmBegin = kmBeginField->GetText();
+    auto kmEnd = kmEndField->GetText();
+    auto consumption = consumptionField->GetText();
+    auto car = carField->GetText();
+    auto driver = driverField->GetText();
+    auto driverNum = Util::WStringToNumber(driver);
+    auto consumptionNum = Util::WStringToNumber(consumption);
+
+    json j = {
+        { "location_begin", Util::to_utf8(locationBegin) },
+        { "location_end", Util::to_utf8(locationEnd) },
+        { "date", Util::to_utf8(date) },
+        { "time", Util::to_utf8(time) },
+        { "km_begin", Util::to_utf8(kmBegin) },
+        { "km_end", Util::to_utf8(kmEnd) },
+        { "consumtion", consumptionNum },
+        { "vehicle", { { "num_blade", Util::to_utf8(car) } } },
+        { "driver", { { "driverId", driverNum } } }
+    };
+
+    std::cout << j.dump(5) << std::endl;
+
+    auto win = dynamic_cast<SubWindow*>(this->win);
+    win->onCloseCallback = [j](Window* parent) {
+        parent->LoadInBackground(
+            L"localhost",
+            L"/car-edgers/drives/create",
+            j.dump(),
+            "application/json",
+            8080,
+            [parent](const json& res) {
+                auto drivingFrame = std::make_shared<DrivingFrame>();
+                parent->LoadFrame(drivingFrame, {});
+            },
+            [parent](const std::string& err) {
+                MessageBoxA(nullptr, err.c_str(), "Error", MB_ICONERROR);
+            }
+        );
         };
     Close(this->win);
+}
+
+DriveDetailFrame::DriveDetailFrame() {
+    auto largeFont = Util::CreatePointFont(16);
+    auto titleFont = Util::CreatePointFont(22);
+
+    titleText = std::make_shared<Text>(L"Drive Details");
+    titleText->SetPosition(30, 20);
+    titleText->SetFont(titleFont);
+
+    locationBeginText = std::make_shared<Text>();
+    locationBeginText->SetPosition(20, 70);
+    locationBeginText->SetFont(largeFont);
+
+    locationEndText = std::make_shared<Text>();
+    locationEndText->SetPosition(20, 110);
+    locationEndText->SetFont(largeFont);
+
+    dateText = std::make_shared<Text>();
+    dateText->SetPosition(20, 150);
+    dateText->SetFont(largeFont);
+
+    timeText = std::make_shared<Text>();
+    timeText->SetPosition(20, 190);
+    timeText->SetFont(largeFont);
+
+    kmBeginText = std::make_shared<Text>();
+    kmBeginText->SetPosition(20, 230);
+    kmBeginText->SetFont(largeFont);
+
+    kmEndText = std::make_shared<Text>();
+    kmEndText->SetPosition(20, 270);
+    kmEndText->SetFont(largeFont);
+
+    consumptionText = std::make_shared<Text>();
+    consumptionText->SetPosition(20, 310);
+    consumptionText->SetFont(largeFont);
+
+    vehicleNumBladeText = std::make_shared<Text>();
+    vehicleNumBladeText->SetPosition(20, 350);
+    vehicleNumBladeText->SetFont(largeFont);
+
+    driverIdText = std::make_shared<Text>();
+    driverIdText->SetPosition(20, 390);
+    driverIdText->SetFont(largeFont);
+
+    RegisterComponent(titleText);
+    RegisterComponent(locationBeginText);
+    RegisterComponent(locationEndText);
+    RegisterComponent(dateText);
+    RegisterComponent(timeText);
+    RegisterComponent(kmBeginText);
+    RegisterComponent(kmEndText);
+    RegisterComponent(consumptionText);
+    RegisterComponent(vehicleNumBladeText);
+    RegisterComponent(driverIdText);
+}
+
+void DriveDetailFrame::WakeUp(Window* win, const json& options) {
+    Frame::WakeUp(win, options);
+    win->SetTitle(L"Car Edger - Drive Details");
+    win->SetStyle(DEFAULT_STYLE_WITHOUT_RESIZE);
+    win->SetSize(400, 450);
+    win->SetMenuResource(-1);
+
+    std::wstring locationBegin = L"N/A";
+    std::wstring locationEnd = L"N/A";
+    std::wstring date = L"N/A";
+    std::wstring time = L"N/A";
+    std::wstring kmBegin = L"N/A";
+    std::wstring kmEnd = L"N/A";
+    std::wstring consumption = L"N/A";
+    std::wstring vehicleNumBlade = L"N/A";
+    std::wstring driverId = L"N/A";
+
+    if (options.is_object()) {
+        if (!options["location_begin"].is_null())
+            locationBegin = Util::to_utf16(options["location_begin"].get<std::string>());
+        if (!options["location_end"].is_null())
+            locationEnd = Util::to_utf16(options["location_end"].get<std::string>());
+        if (!options["date"].is_null())
+            date = Util::to_utf16(options["date"].get<std::string>());
+        if (!options["time"].is_null())
+            time = Util::to_utf16(options["time"].get<std::string>());
+        if (!options["Km_begin"].is_null())
+            kmBegin = Util::to_utf16(options["Km_begin"].get<std::string>());
+        if (!options["Km_end"].is_null())
+            kmEnd = Util::to_utf16(options["Km_end"].get<std::string>());
+        if (options["consumtion"].is_number()) {
+            consumption = Util::to_utf16(std::to_string(options["consumtion"].get<double>()));
+        }
+        if (options.contains("vehicle") 
+            && options["vehicle"].is_object() 
+            && !options["vehicle"]["num_blade"].is_null()) {
+            vehicleNumBlade = Util::to_utf16(options["vehicle"]["num_blade"].get<std::string>());
+        }
+        if (options.contains("driver") 
+            && options["driver"].is_object() 
+            && !options["driver"]["driverId"].is_null()) {
+            driverId = Util::to_utf16(std::to_string(options["driver"]["driverId"].get<int>()));
+        }
+    }
+
+    locationBeginText->SetText(L"Location Begin: " + locationBegin);
+    locationEndText->SetText(L"Location End: " + locationEnd);
+    dateText->SetText(L"Date: " + date);
+    timeText->SetText(L"Time: " + time);
+    kmBeginText->SetText(L"Km Begin: " + kmBegin);
+    kmEndText->SetText(L"Km End: " + kmEnd);
+    consumptionText->SetText(L"Consumption: " + consumption);
+    vehicleNumBladeText->SetText(L"Vehicle Number Plate: " + vehicleNumBlade);
+    driverIdText->SetText(L"Driver ID: " + driverId);
 }
